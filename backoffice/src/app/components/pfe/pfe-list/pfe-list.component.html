@@ -1,0 +1,123 @@
+<div class="pfe-list-container">
+  <div class="header">
+    <h2>PFE Subject Management</h2>
+    <div class="actions">
+      <div class="search-box">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          placeholder="Search PFE subjects..." 
+          class="search-input">
+      </div>
+      <button routerLink="/pfe/create" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Create PFE Subject
+      </button>
+    </div>
+  </div>
+
+  <div class="table-container" *ngIf="!loading">
+    <table class="pfe-table" *ngIf="filteredSubjects.length > 0">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Created By</th>
+          <th>Status</th>
+          <th>Applications</th>
+          <th>Evaluation</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let subject of filteredSubjects" class="pfe-row">
+          <td class="title-cell">
+            <div class="title-content">
+              <h3 class="subject-title">{{ subject.title }}</h3>
+              <p class="subject-description">{{ subject.description | slice:0:100 }}...</p>
+            </div>
+          </td>
+          
+          <td class="creator-cell">
+            <div class="creator-info">
+              <span class="creator-name">{{ subject.createdByName }}</span>
+              <span class="creator-role">{{ subject.createdByRole }}</span>
+            </div>
+          </td>
+          
+          <td class="status-cell">
+            <span class="status-badge" [class]="getStatusClass(subject.status)">
+              {{ getStatusText(subject.status) }}
+            </span>
+          </td>
+          
+          <td class="applications-cell">
+            <div class="application-stats">
+              <div class="stat">
+                <span class="stat-number">{{ subject.applicationCount }}</span>
+                <span class="stat-label">Total</span>
+              </div>
+              <div class="stat">
+                <span class="stat-number">{{ subject.pendingApplications }}</span>
+                <span class="stat-label">Pending</span>
+              </div>
+              <div class="stat">
+                <span class="stat-number">{{ subject.acceptedApplications }}</span>
+                <span class="stat-label">Accepted</span>
+              </div>
+            </div>
+          </td>
+          
+          <td class="evaluation-cell">
+            <div class="evaluation-info" *ngIf="subject.hasEvaluation; else noEvaluation">
+              <span class="grade">{{ subject.evaluationGrade }}/20</span>
+              <span class="evaluated">Evaluated</span>
+            </div>
+            <ng-template #noEvaluation>
+              <span class="no-evaluation">Not evaluated</span>
+            </ng-template>
+          </td>
+          
+          <td class="date-cell">
+            <span class="date">{{ subject.createdAt | date:'short' }}</span>
+          </td>
+          
+          <td class="actions-cell">
+            <div class="subject-actions">
+              <button 
+                [routerLink]="['/pfe', subject.id, 'applications']" 
+                class="btn btn-sm btn-outline"
+                title="View Applications">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button 
+                [routerLink]="['/pfe', subject.id, 'edit']" 
+                class="btn btn-sm btn-secondary"
+                title="Edit">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button 
+                (click)="deleteSubject(subject.id!)" 
+                class="btn btn-sm btn-danger"
+                title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading PFE subjects...</p>
+  </div>
+
+  <div class="no-subjects" *ngIf="!loading && filteredSubjects.length === 0">
+    <i class="fas fa-graduation-cap fa-3x"></i>
+    <h3>No PFE subjects found</h3>
+    <p *ngIf="searchTerm">Try adjusting your search terms.</p>
+    <p *ngIf="!searchTerm">Start by creating your first PFE subject.</p>
+    <button routerLink="/pfe/create" class="btn btn-primary">Create First PFE Subject</button>
+  </div>
+</div>

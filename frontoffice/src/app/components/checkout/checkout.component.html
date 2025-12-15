@@ -1,0 +1,89 @@
+<div class="max-w-6xl mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold mb-6">Checkout</h1>
+
+  <div *ngIf="loading" class="text-center py-12">
+    <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    <p class="mt-4 text-gray-600">Loading...</p>
+  </div>
+
+  <div *ngIf="!loading && order" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Order Summary -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Payment Form -->
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <h2 class="text-xl font-semibold mb-4">Payment Information</h2>
+        
+        <!-- Stripe Payment Element -->
+        <div id="payment-element" class="mb-4"></div>
+
+        <div id="payment-message" class="text-red-600 text-sm mb-4" *ngIf="error">
+          {{ error }}
+        </div>
+
+        <button (click)="handleSubmit()"
+                [disabled]="paymentProcessing"
+                class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors">
+          {{ paymentProcessing ? 'Processing...' : 'Pay Now' }}
+        </button>
+      </div>
+
+      <!-- Order Items -->
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <h2 class="text-xl font-semibold mb-4">Order Items</h2>
+        <div class="space-y-4">
+          <div *ngFor="let item of order.items" class="flex items-center space-x-4 border-b pb-4">
+            <img [src]="item.thumbnailImage ? 'http://localhost:8090/uploads/' + item.thumbnailImage : '/assets/default-course.png'" 
+                 [alt]="item.courseTitle"
+                 class="w-20 h-14 object-cover rounded">
+            <div class="flex-1">
+              <h3 class="font-medium">{{ item.courseTitle }}</h3>
+              <p class="text-sm text-gray-500">Course</p>
+            </div>
+            <p class="font-semibold">{{ formatPrice(item.price) }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Summary Sidebar -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-lg shadow-sm p-6 sticky top-6">
+        <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
+        <div class="space-y-3 mb-4">
+          <div class="flex justify-between">
+            <span class="text-gray-600">Subtotal</span>
+            <span class="font-semibold">{{ formatPrice(order.totalAmount) }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">Tax</span>
+            <span class="font-semibold">$0.00</span>
+          </div>
+          <div class="border-t pt-3">
+            <div class="flex justify-between text-lg">
+              <span class="font-bold">Total</span>
+              <span class="font-bold">{{ formatPrice(order.totalAmount) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+          <p>🔒 Your payment information is secure and encrypted.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!loading && !order" class="text-center py-12">
+    <svg class="mx-auto h-24 w-24 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+    </svg>
+    <h2 class="text-2xl font-semibold text-gray-900 mb-2">Unable to load checkout</h2>
+    <p class="text-gray-600 mb-6">{{ error || 'Please try again later.' }}</p>
+    <button (click)="goToCart()"
+            class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+      Back to Cart
+    </button>
+  </div>
+</div>
+

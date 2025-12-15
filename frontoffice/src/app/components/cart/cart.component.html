@@ -1,0 +1,105 @@
+<div class="min-h-screen modern-page-background py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
+      <p class="text-gray-600" *ngIf="cart?.items && cart.items.length > 0">
+        {{ cart.items.length }} {{ cart.items.length === 1 ? 'item' : 'items' }} in your cart
+      </p>
+    </div>
+
+    <div *ngIf="cart?.items && cart.items.length > 0" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Cart Items -->
+      <div class="lg:col-span-2 space-y-4">
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-primary-50 to-primary-100">
+            <h2 class="text-xl font-semibold text-gray-900">Your Courses</h2>
+          </div>
+          <div *ngFor="let item of cart.items; let i = index" 
+               class="border-b border-gray-200 last:border-b-0 p-6 hover:bg-gray-50 transition-colors duration-200">
+            <div class="flex items-start space-x-4">
+              <!-- Course Image -->
+              <div class="flex-shrink-0">
+                <img [src]="item.thumbnailImage ? 'http://localhost:8090/uploads/' + item.thumbnailImage : '/assets/default-course.png'" 
+                     [alt]="item.courseTitle"
+                     class="w-32 h-20 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow">
+              </div>
+              
+              <!-- Course Info -->
+              <div class="flex-1 min-w-0">
+                <h3 class="text-lg font-semibold text-gray-900 mb-1 hover:text-primary-600 transition-colors">{{ item.courseTitle }}</h3>
+                <p class="text-sm text-gray-500 mb-3">Online Course</p>
+                <div class="flex items-center justify-between">
+                  <div class="text-2xl font-bold text-primary-600">
+                    <span *ngIf="item.price === 0" class="text-green-600">Free</span>
+                    <span *ngIf="item.price > 0">${{ item.price | number:'1.2-2' }}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Remove Button -->
+              <button (click)="removeItem(item.id)"
+                      class="flex-shrink-0 text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                      [disabled]="loading"
+                      title="Remove from cart">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-xl shadow-lg p-6 sticky top-6">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b border-gray-200">Order Summary</h2>
+          <div class="space-y-4 mb-6">
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Subtotal ({{ cart.items.length }} {{ cart.items.length === 1 ? 'item' : 'items' }})</span>
+              <span class="text-lg font-semibold text-gray-900">${{ totalAmount | number:'1.2-2' }}</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-gray-500">Tax</span>
+              <span class="text-gray-700">$0.00</span>
+            </div>
+            <div class="border-t-2 border-gray-200 pt-4">
+              <div class="flex justify-between items-center">
+                <span class="text-xl font-bold text-gray-900">Total</span>
+                <span class="text-2xl font-bold text-primary-600">${{ totalAmount | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <button (click)="proceedToCheckout()"
+                  class="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-4 rounded-lg font-semibold text-lg hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+            Proceed to Checkout
+          </button>
+          
+          <a routerLink="/courses"
+             class="block text-center mt-4 text-primary-600 hover:text-primary-700 font-medium transition-colors">
+            Continue Shopping →
+          </a>
+        </div>
+      </div>
+    </div>
+
+  <!-- Empty Cart -->
+  <div *ngIf="!cart?.items || cart.items.length === 0" class="flex items-center justify-center min-h-[60vh]">
+    <div class="text-center max-w-md px-4">
+      <div class="mx-auto w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+        <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+        </svg>
+      </div>
+      <h2 class="text-3xl font-bold text-gray-900 mb-3">Your cart is empty</h2>
+      <p class="text-gray-600 mb-8 text-lg">Start adding amazing courses to your cart and begin your learning journey!</p>
+      <a routerLink="/courses" 
+         class="inline-block bg-gradient-to-r from-primary-600 to-primary-700 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+        Browse Courses
+      </a>
+    </div>
+  </div>
+</div>
+

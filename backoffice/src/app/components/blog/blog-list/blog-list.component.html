@@ -1,0 +1,126 @@
+<div class="blog-list-container">
+  <div class="header">
+    <h2>Blog Management</h2>
+    <div class="actions">
+      <div class="search-box">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          placeholder="Search blogs..." 
+          class="search-input">
+      </div>
+      <button routerLink="/blogs/create" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Create Blog
+      </button>
+    </div>
+  </div>
+
+  <div class="table-container" *ngIf="!loading">
+    <table class="blog-table" *ngIf="filteredBlogs.length > 0">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Tags</th>
+          <th>Stats</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let blog of filteredBlogs" class="blog-row">
+          <td class="image-cell">
+            <div class="blog-image" *ngIf="blog.photo; else noImage">
+              <img [src]="blog.photo" [alt]="blog.title">
+            </div>
+            <ng-template #noImage>
+              <div class="no-image">
+                <i class="fas fa-image"></i>
+              </div>
+            </ng-template>
+          </td>
+          
+          <td class="title-cell">
+            <div class="title-content">
+              <h3 class="blog-title">{{ blog.title }}</h3>
+              <p class="blog-excerpt">{{ blog.content | slice:0:100 }}...</p>
+            </div>
+          </td>
+          
+          <td class="author-cell">
+            <div class="author-info">
+              <span class="author-name">{{ blog.authorName }}</span>
+              <span class="author-role">{{ blog.authorRole }}</span>
+            </div>
+          </td>
+          
+          <td class="tags-cell">
+            <div class="blog-tags" *ngIf="blog.tags.length > 0; else noTags">
+              <span class="tag" *ngFor="let tag of blog.tags | slice:0:2">{{ tag }}</span>
+              <span class="more-tags" *ngIf="blog.tags.length > 2">+{{ blog.tags.length - 2 }}</span>
+            </div>
+            <ng-template #noTags>
+              <span class="no-tags">No tags</span>
+            </ng-template>
+          </td>
+          
+          <td class="stats-cell">
+            <div class="blog-stats">
+              <div class="stat">
+                <i class="fas fa-heart"></i>
+                <span>{{ blog.likes }}</span>
+              </div>
+              <div class="stat">
+                <i class="fas fa-comment"></i>
+                <span>{{ blog.commentCount }}</span>
+              </div>
+            </div>
+          </td>
+          
+          <td class="date-cell">
+            <div class="date-info">
+              <span class="date">{{ blog.createdAt | date:'short' }}</span>
+            </div>
+          </td>
+          
+          <td class="actions-cell">
+            <div class="blog-actions">
+              <button 
+                [routerLink]="['/blogs', blog.id, 'edit']" 
+                class="btn btn-sm btn-secondary"
+                title="Edit">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button 
+                (click)="likeBlog(blog.id!)" 
+                class="btn btn-sm btn-success"
+                title="Like">
+                <i class="fas fa-heart"></i>
+              </button>
+              <button 
+                (click)="deleteBlog(blog.id!)" 
+                class="btn btn-sm btn-danger"
+                title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading blogs...</p>
+  </div>
+
+  <div class="no-blogs" *ngIf="!loading && filteredBlogs.length === 0">
+    <i class="fas fa-blog fa-3x"></i>
+    <h3>No blogs found</h3>
+    <p *ngIf="searchTerm">Try adjusting your search terms.</p>
+    <p *ngIf="!searchTerm">Start by creating your first blog post.</p>
+    <button routerLink="/blogs/create" class="btn btn-primary">Create First Blog</button>
+  </div>
+</div>

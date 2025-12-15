@@ -1,0 +1,168 @@
+<div class="quiz-result-container">
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Chargement des résultats...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <!-- Results -->
+  <div *ngIf="attempt && !loading" class="results-content">
+    <!-- Header with score -->
+    <div class="result-header" [class]="scoreClass">
+      <div class="result-icon">
+        <i *ngIf="attempt.passed" class="fas fa-check-circle"></i>
+        <i *ngIf="!attempt.passed" class="fas fa-times-circle"></i>
+      </div>
+      
+      <h1>{{ resultMessage }}</h1>
+      
+      <div class="score-circle">
+        <svg viewBox="0 0 200 200">
+          <circle 
+            class="score-bg" 
+            cx="100" 
+            cy="100" 
+            r="90" 
+          />
+          <circle 
+            class="score-progress" 
+            cx="100" 
+            cy="100" 
+            r="90"
+            [style.stroke-dasharray]="(scorePercentage * 565.48) / 100 + ' 565.48'"
+          />
+        </svg>
+        <div class="score-text">
+          <span class="score-number">{{ attempt.score }}%</span>
+          <span class="score-label">Score</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="statistics-grid">
+      <div class="stat-card">
+        <i class="fas fa-star"></i>
+        <div class="stat-content">
+          <span class="stat-value">{{ attempt.earnedPoints }} / {{ attempt.totalPoints }}</span>
+          <span class="stat-label">Points obtenus</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <i class="fas fa-question-circle"></i>
+        <div class="stat-content">
+          <span class="stat-value">{{ attempt.questionResults?.length || 0 }}</span>
+          <span class="stat-label">Questions</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <i class="fas fa-check"></i>
+        <div class="stat-content">
+          <span class="stat-value">
+            {{ getCorrectAnswersCount() }}
+          </span>
+          <span class="stat-label">Réponses correctes</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <i class="fas fa-clock"></i>
+        <div class="stat-content">
+          <span class="stat-value">{{ attempt.completedAt | date:'short' }}</span>
+          <span class="stat-label">Terminé le</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Results -->
+    <div class="detailed-results" *ngIf="attempt.questionResults && attempt.questionResults.length > 0">
+      <h2>Résultats détaillés</h2>
+      
+      <div class="question-result" *ngFor="let result of attempt.questionResults; let i = index"
+           [class.correct]="result.isCorrect"
+           [class.incorrect]="!result.isCorrect">
+        <div class="question-result-header">
+          <span class="question-number">Question {{ i + 1 }}</span>
+          <span class="question-points">
+            {{ result.earnedPoints }} / {{ result.points }} points
+          </span>
+          <span class="result-badge" [class.correct]="result.isCorrect">
+            <i *ngIf="result.isCorrect" class="fas fa-check"></i>
+            <i *ngIf="!result.isCorrect" class="fas fa-times"></i>
+            {{ result.isCorrect ? 'Correct' : 'Incorrect' }}
+          </span>
+        </div>
+
+        <div class="question-text">
+          {{ result.question }}
+        </div>
+
+        <div class="answer-section">
+          <div class="student-answer">
+            <strong>Votre réponse:</strong>
+            <span [class.incorrect-answer]="!result.isCorrect">
+              {{ result.studentAnswer || 'Non répondu' }}
+            </span>
+          </div>
+
+          <div class="correct-answer" *ngIf="!result.isCorrect">
+            <strong>Réponse correcte:</strong>
+            <span class="correct-text">{{ result.correctAnswer }}</span>
+          </div>
+        </div>
+
+        <div class="explanation" *ngIf="result.explanation">
+          <i class="fas fa-info-circle"></i>
+          <span>{{ result.explanation }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="result-actions">
+      <button class="btn btn-secondary" (click)="goToCourse()">
+        <i class="fas fa-arrow-left"></i>
+        Retour au cours
+      </button>
+
+      <button *ngIf="!attempt.passed" class="btn btn-primary" (click)="retakeQuiz()">
+        <i class="fas fa-redo"></i>
+        Refaire le quiz
+      </button>
+
+      <button *ngIf="attempt.passed" class="btn btn-success" (click)="downloadCertificate()" [disabled]="loading">
+        <i class="fas" [ngClass]="loading ? 'fa-spinner fa-spin' : 'fa-certificate'"></i>
+        {{ loading ? 'Génération...' : 'Obtenir le certificat' }}
+      </button>
+    </div>
+
+    <!-- Next Steps -->
+    <div class="next-steps" *ngIf="attempt.passed">
+      <div class="success-message">
+        <i class="fas fa-trophy"></i>
+        <div>
+          <h3>Bravo !</h3>
+          <p>Vous avez réussi ce quiz et êtes maintenant éligible pour obtenir votre certificat de cours.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="next-steps" *ngIf="!attempt.passed">
+      <div class="retry-message">
+        <i class="fas fa-book-reader"></i>
+        <div>
+          <h3>Continuez vos efforts</h3>
+          <p>Revoyez le contenu du cours et réessayez le quiz. Vous pouvez le refaire autant de fois que nécessaire.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

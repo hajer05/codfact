@@ -1,0 +1,174 @@
+<div class="my-consulting-requests-page">
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="header-section mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Mes Demandes de Consulting</h1>
+      <p class="text-gray-600">Consultez l'état de vos demandes de consultation</p>
+      <a routerLink="/consulting" class="btn btn-primary inline-flex items-center gap-2 mt-4">
+        <i class="fas fa-plus"></i>
+        Nouvelle Demande
+      </a>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Chargement de vos demandes...</p>
+    </div>
+
+    <!-- No Requests -->
+    <div class="no-requests" *ngIf="!loading && requests.length === 0">
+      <i class="fas fa-inbox text-6xl text-gray-400 mb-4"></i>
+      <h3 class="text-xl font-semibold text-gray-700 mb-2">Aucune demande</h3>
+      <p class="text-gray-500 mb-6">Vous n'avez pas encore soumis de demande de consultation.</p>
+      <a routerLink="/consulting" class="btn btn-primary">
+        <i class="fas fa-plus"></i>
+        Créer une Demande
+      </a>
+    </div>
+
+    <!-- Requests List -->
+    <div class="requests-grid" *ngIf="!loading && requests.length > 0">
+      <div *ngFor="let request of requests" class="request-card">
+        <div class="request-header">
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">{{ request.companyName }}</h3>
+            <p class="text-sm text-gray-500">Soumis le {{ formatDate(request.createdAt) }}</p>
+          </div>
+          <span [class]="'status-badge ' + getStatusColor(request.status)">
+            {{ getStatusLabel(request.status) }}
+          </span>
+        </div>
+
+        <div class="request-body">
+          <div class="info-row">
+            <i class="fas fa-user text-red-600"></i>
+            <span class="label">Contact:</span>
+            <span class="value">{{ request.contactName }}</span>
+          </div>
+          <div class="info-row">
+            <i class="fas fa-envelope text-red-600"></i>
+            <span class="label">Email:</span>
+            <span class="value">{{ request.email }}</span>
+          </div>
+          <div class="info-row">
+            <i class="fas fa-briefcase text-red-600"></i>
+            <span class="label">Service:</span>
+            <span class="value">{{ request.serviceType }}</span>
+          </div>
+        </div>
+
+        <div class="request-footer">
+          <button class="btn btn-outline" (click)="openDetails(request)">
+            <i class="fas fa-eye"></i>
+            Voir les Détails
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div class="modal-overlay" *ngIf="showDetailsModal" (click)="closeDetails()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Détails de la Demande</h2>
+          <button class="close-btn" (click)="closeDetails()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="modal-body" *ngIf="selectedRequest">
+          <!-- Status -->
+          <div class="status-section">
+            <label>Statut Actuel:</label>
+            <span [class]="'status-badge-large ' + getStatusColor(selectedRequest.status)">
+              {{ getStatusLabel(selectedRequest.status) }}
+            </span>
+          </div>
+
+          <!-- Contact Info -->
+          <div class="section">
+            <h3 class="section-title">Informations de Contact</h3>
+            <div class="details-grid">
+              <div class="detail-item">
+                <label>Entreprise:</label>
+                <span>{{ selectedRequest.companyName }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Contact:</label>
+                <span>{{ selectedRequest.contactName }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Email:</label>
+                <span>{{ selectedRequest.email }}</span>
+              </div>
+              <div class="detail-item" *ngIf="selectedRequest.phone">
+                <label>Téléphone:</label>
+                <span>{{ selectedRequest.phone }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Project Details -->
+          <div class="section">
+            <h3 class="section-title">Détails du Projet</h3>
+            <div class="details-grid">
+              <div class="detail-item full-width">
+                <label>Type de Service:</label>
+                <span>{{ selectedRequest.serviceType }}</span>
+              </div>
+              <div class="detail-item full-width">
+                <label>Description:</label>
+                <p class="description">{{ selectedRequest.projectDescription }}</p>
+              </div>
+              <div class="detail-item full-width">
+                <label>Besoins:</label>
+                <p class="description">{{ selectedRequest.needs }}</p>
+              </div>
+              <div class="detail-item">
+                <label>Budget Estimé:</label>
+                <span>{{ selectedRequest.budget || 'Non spécifié' }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Délais:</label>
+                <span>{{ selectedRequest.timeline || 'Non spécifié' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Admin Response (if answered) -->
+          <div class="section" *ngIf="selectedRequest.adminNotes">
+            <h3 class="section-title">Réponse du Consultant</h3>
+            <div class="response-box">
+              <p>{{ selectedRequest.adminNotes }}</p>
+            </div>
+          </div>
+
+          <!-- Dates -->
+          <div class="section">
+            <h3 class="section-title">Informations de Date</h3>
+            <div class="dates-grid">
+              <div class="date-item">
+                <label>Soumis le:</label>
+                <span>{{ formatDate(selectedRequest.createdAt) }}</span>
+              </div>
+              <div class="date-item" *ngIf="selectedRequest.updatedAt">
+                <label>Modifié le:</label>
+                <span>{{ formatDate(selectedRequest.updatedAt) }}</span>
+              </div>
+              <div class="date-item" *ngIf="selectedRequest.answeredAt">
+                <label>Répondu le:</label>
+                <span>{{ formatDate(selectedRequest.answeredAt) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-primary" (click)="closeDetails()">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

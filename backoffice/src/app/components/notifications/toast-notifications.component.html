@@ -1,0 +1,70 @@
+<div class="fixed top-4 right-4 z-[9999] space-y-3 max-w-md w-full">
+  <div *ngFor="let notification of notifications" 
+       class="relative transform transition-all duration-300 ease-in-out animate-slide-in-right shadow-xl rounded-lg overflow-hidden"
+       [ngClass]="{
+         'bg-green-50 border-l-4 border-green-500': notification.type === 'success',
+         'bg-red-50 border-l-4 border-red-500': notification.type === 'error',
+         'bg-yellow-50 border-l-4 border-yellow-500': notification.type === 'warning',
+         'bg-blue-50 border-l-4 border-blue-500': notification.type === 'info'
+       }">
+    <div class="p-4">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <svg class="h-6 w-6"
+               [ngClass]="{
+                 'text-green-500': notification.type === 'success',
+                 'text-red-500': notification.type === 'error',
+                 'text-yellow-500': notification.type === 'warning',
+                 'text-blue-500': notification.type === 'info'
+               }"
+               fill="none" 
+               stroke="currentColor" 
+               viewBox="0 0 24 24">
+            <path stroke-linecap="round" 
+                  stroke-linejoin="round" 
+                  stroke-width="2" 
+                  [attr.d]="getIcon(notification.type)"></path>
+          </svg>
+        </div>
+        <div class="ml-3 flex-1">
+          <p class="text-sm font-medium"
+             [ngClass]="{
+               'text-green-800': notification.type === 'success',
+               'text-red-800': notification.type === 'error',
+               'text-yellow-800': notification.type === 'warning',
+               'text-blue-800': notification.type === 'info'
+             }">
+            {{ notification.message }}
+          </p>
+        </div>
+        <div class="ml-4 flex-shrink-0">
+          <button (click)="remove(notification.id)"
+                  class="inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                  [ngClass]="{
+                    'text-green-500 hover:bg-green-100 focus:ring-green-600': notification.type === 'success',
+                    'text-red-500 hover:bg-red-100 focus:ring-red-600': notification.type === 'error',
+                    'text-yellow-500 hover:bg-yellow-100 focus:ring-yellow-600': notification.type === 'warning',
+                    'text-blue-500 hover:bg-blue-100 focus:ring-blue-600': notification.type === 'info'
+                  }">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Progress bar -->
+    <div class="h-1 bg-gray-200">
+      <div class="h-full transition-all duration-linear"
+           [ngClass]="{
+             'bg-green-500': notification.type === 'success',
+             'bg-red-500': notification.type === 'error',
+             'bg-yellow-500': notification.type === 'warning',
+             'bg-blue-500': notification.type === 'info'
+           }"
+           [style.width.%]="100"
+           [style.animation]="'progress ' + (notification.duration || 5000) + 'ms linear'"></div>
+    </div>
+  </div>
+</div>
+

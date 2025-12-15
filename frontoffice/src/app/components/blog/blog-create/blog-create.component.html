@@ -1,0 +1,179 @@
+<div class="blog-create-container">
+  <!-- Header -->
+  <div class="header-section">
+    <div class="container">
+      <div class="header-content">
+        <div class="breadcrumb">
+          <a routerLink="/blogs" class="breadcrumb-link">
+            <i class="fas fa-arrow-left"></i> Back to Blogs
+          </a>
+        </div>
+        <h1>Share Your Knowledge</h1>
+        <p>Create an engaging blog post to share with the learning community</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Section -->
+  <div class="form-section">
+    <div class="container">
+      <div class="form-wrapper">
+        <!-- Form Controls -->
+        <div class="form-controls">
+          <button 
+            type="button" 
+            (click)="togglePreview()" 
+            class="btn btn-outline">
+            <i class="fas fa-eye" *ngIf="!previewMode"></i>
+            <i class="fas fa-edit" *ngIf="previewMode"></i>
+            {{ previewMode ? 'Edit' : 'Preview' }}
+          </button>
+        </div>
+
+        <!-- Edit Mode -->
+        <form [formGroup]="blogForm" (ngSubmit)="onSubmit()" *ngIf="!previewMode">
+          <div class="form-grid">
+            <!-- Left Column -->
+            <div class="form-column">
+              <!-- Title -->
+              <div class="form-group">
+                <label for="title" class="form-label">
+                  Title *
+                  <span class="char-count">{{ title?.value?.length || 0 }}/500</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="title"
+                  formControlName="title"
+                  class="form-control title-input"
+                  [class.error]="title?.invalid && title?.touched"
+                  placeholder="Enter an engaging title for your blog post">
+                <div class="error-message" *ngIf="title?.invalid && title?.touched">
+                  <span *ngIf="title?.errors?.['required']">Title is required</span>
+                  <span *ngIf="title?.errors?.['maxlength']">Title must be less than 500 characters</span>
+                </div>
+              </div>
+
+              <!-- Featured Image -->
+              <div class="form-group">
+                <label for="photo" class="form-label">Featured Image URL</label>
+                <input 
+                  type="url" 
+                  id="photo"
+                  formControlName="photo"
+                  class="form-control"
+                  placeholder="https://example.com/image.jpg">
+                <small class="form-help">Add a compelling image to make your post stand out</small>
+              </div>
+
+              <!-- Image Preview -->
+              <div class="image-preview" *ngIf="photo?.value">
+                <img [src]="photo?.value" [alt]="title?.value" (error)="photo?.setValue('')">
+              </div>
+
+              <!-- Tags -->
+              <div class="form-group">
+                <label class="form-label">
+                  Tags
+                  <span class="tag-count">{{ tags.length }}/5</span>
+                </label>
+                <div class="tag-input-container">
+                  <input 
+                    type="text" 
+                    [(ngModel)]="tagInput"
+                    (keypress)="onTagInputKeyPress($event)"
+                    class="form-control"
+                    placeholder="Add a tag and press Enter"
+                    [ngModelOptions]="{standalone: true}"
+                    [disabled]="tags.length >= 5">
+                  <button 
+                    type="button" 
+                    (click)="addTag()" 
+                    class="btn btn-secondary"
+                    [disabled]="!tagInput.trim() || tags.length >= 5">
+                    Add
+                  </button>
+                </div>
+                
+                <div class="tags-display" *ngIf="tags.length > 0">
+                  <span class="tag" *ngFor="let tag of tags; let i = index">
+                    {{ tag }}
+                    <button type="button" (click)="removeTag(i)" class="tag-remove">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </span>
+                </div>
+                <small class="form-help">Add up to 5 relevant tags to help others discover your content</small>
+              </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="form-column">
+              <!-- Content -->
+              <div class="form-group">
+                <label for="content" class="form-label">
+                  Content *
+                  <span class="char-count">{{ content?.value?.length || 0 }} characters</span>
+                </label>
+                <textarea 
+                  id="content"
+                  formControlName="content"
+                  class="form-control content-textarea"
+                  [class.error]="content?.invalid && content?.touched"
+                  placeholder="Write your blog content here... Share your knowledge, experiences, and insights with the community."
+                  rows="20"></textarea>
+                <div class="error-message" *ngIf="content?.invalid && content?.touched">
+                  <span *ngIf="content?.errors?.['required']">Content is required</span>
+                  <span *ngIf="content?.errors?.['minlength']">Content must be at least 50 characters</span>
+                </div>
+                <small class="form-help">Write engaging content that provides value to readers</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button type="button" (click)="cancel()" class="btn btn-outline">
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              class="btn btn-primary"
+              [disabled]="submitting || blogForm.invalid">
+              <i class="fas fa-spinner fa-spin" *ngIf="submitting"></i>
+              <i class="fas fa-paper-plane" *ngIf="!submitting"></i>
+              {{ submitting ? 'Publishing...' : 'Publish Blog' }}
+            </button>
+          </div>
+        </form>
+
+        <!-- Preview Mode -->
+        <div class="preview-container" *ngIf="previewMode">
+          <article class="blog-preview">
+            <!-- Featured Image -->
+            <div class="preview-image" *ngIf="photo?.value">
+              <img [src]="photo?.value" [alt]="title?.value">
+            </div>
+
+            <!-- Blog Header -->
+            <div class="preview-header">
+              <div class="preview-tags" *ngIf="tags.length > 0">
+                <span class="tag" *ngFor="let tag of tags">{{ tag }}</span>
+              </div>
+              <h1 class="preview-title">{{ title?.value || 'Your Blog Title' }}</h1>
+              <div class="preview-meta">
+                <span class="author">By You</span>
+                <span class="date">{{ getCurrentDate() | date:'MMM dd, yyyy' }}</span>
+              </div>
+            </div>
+
+            <!-- Blog Content -->
+            <div class="preview-content">
+              <div class="content" [innerHTML]="content?.value || 'Your blog content will appear here...'"></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

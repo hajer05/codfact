@@ -1,0 +1,292 @@
+// Line clamp utilities
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+// Custom scrollbar for filter sidebar
+.filter-sidebar {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+    
+    &:hover {
+      background: #94a3b8;
+    }
+  }
+}
+
+// Fix price range filter to stay in sidebar
+.price-range-container {
+  width: 100%;
+  max-width: 100%;
+  
+  .price-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    
+    input {
+      flex: 1 1 0;
+      min-width: 0; // Allow inputs to shrink
+      max-width: 100%;
+    }
+    
+    .price-separator {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+  }
+}
+
+// Modern Course Cards
+.course-card-modern {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 1rem;
+    padding: 2px;
+    background: linear-gradient(135deg, transparent, rgba(220, 38, 38, 0.1), transparent);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+    pointer-events: none;
+  }
+  
+  &:hover {
+    transform: translateY(-8px) scale(1.02);
+    
+    &::before {
+      opacity: 1;
+    }
+  }
+  
+  &:active {
+    transform: translateY(-4px) scale(1.01);
+  }
+}
+
+// Enhanced Filters Sidebar
+.filters-sidebar {
+  position: relative;
+  z-index: 1;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 1rem;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.2), rgba(37, 99, 235, 0.2));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0.5;
+    z-index: -1;
+    pointer-events: none;
+  }
+  
+  // Ensure all interactive elements are clickable
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// Loading animation
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+// Pulse Animation for Loading
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.loading-shimmer {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 1000px 100%;
+}
+
+// Enhanced Empty State with Blurred Background
+.empty-state-container {
+  position: relative;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  border-radius: 20px;
+  overflow: hidden;
+  margin: 40px 0;
+
+  // Blurred background image
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(26, 32, 44, 0.1) 100%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%23dc2626;stop-opacity:0.1"/><stop offset="100%" style="stop-color:%231a202c;stop-opacity:0.1"/></linearGradient></defs><rect fill="url(%23grad)" width="1200" height="600"/><g fill="white" fill-opacity="0.05"><circle cx="100" cy="100" r="80"/><circle cx="400" cy="150" r="120"/><circle cx="800" cy="200" r="100"/><circle cx="1000" cy="400" r="150"/><circle cx="300" cy="450" r="90"/><rect x="600" y="100" width="200" height="200" rx="20"/><rect x="200" y="300" width="150" height="150" rx="15"/></g></svg>');
+    background-size: cover;
+    background-position: center;
+    filter: blur(60px);
+    opacity: 0.6;
+    z-index: 0;
+  }
+
+  // Overlay for better text readability
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    z-index: 1;
+  }
+
+  .empty-state-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 500px;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(220, 38, 38, 0.1);
+    backdrop-filter: blur(20px);
+    animation: fadeInUp 0.6s ease-out;
+
+    .empty-state-icon {
+      margin: 0 auto 24px;
+      width: 96px;
+      height: 96px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      border-radius: 50%;
+      box-shadow: 0 10px 30px rgba(220, 38, 38, 0.3);
+
+      svg {
+        color: white;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+      }
+    }
+
+    .empty-state-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+
+    .empty-state-description {
+      font-size: 1rem;
+      color: #6b7280;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .empty-state-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      svg {
+        flex-shrink: 0;
+      }
+    }
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

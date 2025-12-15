@@ -1,0 +1,226 @@
+<nav class="bg-white shadow-lg border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <!-- Logo -->
+      <div class="flex items-center">
+        <a routerLink="/" class="flex items-center">
+          <img src="/logo/logo-codingfactory.png" alt="Coding Factory" class="h-10 w-auto">
+        </a>
+      </div>
+
+      <!-- Desktop Navigation -->
+      <div class="hidden md:flex items-center space-x-8">
+        <a routerLink="/" 
+           routerLinkActive="text-primary-600" 
+           [routerLinkActiveOptions]="{exact: true}"
+           class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors">
+          Home
+        </a>
+        <a routerLink="/courses" 
+           routerLinkActive="text-primary-600"
+           class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors">
+          Courses
+        </a>
+        <a routerLink="/blogs" 
+           routerLinkActive="text-primary-600"
+           class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors">
+          Blog
+        </a>
+        <a routerLink="/consulting" 
+           routerLinkActive="text-primary-600"
+           class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors">
+          Consulting
+        </a>
+        <a routerLink="/pfe" 
+           routerLinkActive="text-primary-600"
+           class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors">
+          PFE Projects
+        </a>
+        <a routerLink="/about" 
+           routerLinkActive="text-primary-600"
+           class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors">
+          About
+        </a>
+      </div>
+
+      <!-- Auth Buttons / User Menu -->
+      <div class="hidden md:flex items-center space-x-4">
+        <!-- Cart Icon (when authenticated) -->
+        <a *ngIf="isAuthenticated()" 
+           routerLink="/cart"
+           class="relative p-2 text-gray-700 hover:text-primary-600 transition-colors group">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+          <span *ngIf="cartItemCount > 0" 
+                class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full min-w-[1.25rem] h-5 flex items-center justify-center px-1 shadow-lg animate-pulse group-hover:animate-none transition-all">
+            {{ cartItemCount > 99 ? '99+' : cartItemCount }}
+          </span>
+        </a>
+        
+        <!-- Notifications (when authenticated) -->
+        <app-notifications *ngIf="isAuthenticated()"></app-notifications>
+        <!-- Not Authenticated -->
+        <ng-container *ngIf="!isAuthenticated()">
+          <a routerLink="/login" 
+             class="text-gray-700 hover:text-primary-600 px-4 py-2 text-sm font-medium transition-colors">
+            Login
+          </a>
+          <a routerLink="/register" 
+             class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            Register
+          </a>
+        </ng-container>
+
+        <!-- Authenticated User -->
+        <div *ngIf="isAuthenticated()" class="relative">
+          <button (click)="toggleDropdown()" 
+                  class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            <div class="w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
+              {{ getInitials() }}
+            </div>
+            <div class="text-left">
+              <div class="text-sm font-medium text-gray-900">{{ currentUser?.firstName }} {{ currentUser?.lastName }}</div>
+              <div class="text-xs text-gray-500">Student</div>
+            </div>
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          
+          <!-- Dropdown Menu -->
+          <div *ngIf="dropdownOpen" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+            <a routerLink="/profile" (click)="toggleDropdown()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Profile</a>
+            <a routerLink="/courses" (click)="toggleDropdown()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Courses</a>
+            <a routerLink="/transactions" (click)="toggleDropdown()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Transactions</a>
+            <a routerLink="/complaints" (click)="toggleDropdown()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Complaints</a>
+            <a routerLink="/pfe/my-applications" (click)="toggleDropdown()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My PFE Applications</a>
+            <a routerLink="/consulting/my-requests" (click)="toggleDropdown()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Consulting Requests</a>
+            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+            <div class="border-t border-gray-200"></div>
+            <button (click)="logout()" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              Sign out
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile menu button -->
+      <div class="md:hidden">
+        <button (click)="toggleMobileMenu()" 
+                class="text-gray-700 hover:text-primary-600 p-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  [attr.d]="mobileMenuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'">
+            </path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div *ngIf="mobileMenuOpen" class="md:hidden border-t border-gray-200 py-4">
+      <div class="space-y-2">
+        <a routerLink="/" 
+           (click)="toggleMobileMenu()"
+           routerLinkActive="text-primary-600 bg-primary-50" 
+           [routerLinkActiveOptions]="{exact: true}"
+           class="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg">
+          Home
+        </a>
+        <a routerLink="/courses" 
+           (click)="toggleMobileMenu()"
+           routerLinkActive="text-primary-600 bg-primary-50"
+           class="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg">
+          Courses
+        </a>
+        <a routerLink="/blogs" 
+           (click)="toggleMobileMenu()"
+           routerLinkActive="text-primary-600 bg-primary-50"
+           class="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg">
+          Blog
+        </a>
+        <a routerLink="/consulting" 
+           (click)="toggleMobileMenu()"
+           routerLinkActive="text-primary-600 bg-primary-50"
+           class="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg">
+          Consulting
+        </a>
+        <a routerLink="/pfe" 
+           (click)="toggleMobileMenu()"
+           routerLinkActive="text-primary-600 bg-primary-50"
+           class="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg">
+          PFE Projects
+        </a>
+        <a routerLink="/about" 
+           (click)="toggleMobileMenu()"
+           routerLinkActive="text-primary-600 bg-primary-50"
+           class="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg">
+          About
+        </a>
+        <div class="border-t border-gray-200 pt-4 mt-4">
+          <!-- Not Authenticated Mobile -->
+          <ng-container *ngIf="!isAuthenticated()">
+            <a routerLink="/login" 
+               (click)="toggleMobileMenu()"
+               class="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg">
+              Login
+            </a>
+            <a routerLink="/register" 
+               (click)="toggleMobileMenu()"
+               class="block px-4 py-2 text-sm font-medium bg-primary-600 text-white hover:bg-primary-700 rounded-lg mt-2">
+              Register
+            </a>
+          </ng-container>
+
+          <!-- Authenticated Mobile -->
+          <div *ngIf="isAuthenticated()" class="space-y-2">
+            <div class="flex items-center space-x-3 px-4 py-2 bg-gray-50 rounded-lg">
+              <div class="w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                {{ getInitials() }}
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-900">{{ currentUser?.firstName }} {{ currentUser?.lastName }}</div>
+                <div class="text-xs text-gray-500">Student</div>
+              </div>
+            </div>
+            <a routerLink="/profile" 
+               (click)="toggleMobileMenu()"
+               class="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg">
+              My Profile
+            </a>
+            <a routerLink="/courses" 
+               (click)="toggleMobileMenu()"
+               class="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg">
+              My Courses
+            </a>
+            <a routerLink="/transactions" 
+               (click)="toggleMobileMenu()"
+               class="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg">
+              My Transactions
+            </a>
+            <a routerLink="/complaints" 
+               (click)="toggleMobileMenu()"
+               class="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg">
+              My Complaints
+            </a>
+            <a routerLink="/pfe/my-applications" 
+               (click)="toggleMobileMenu()"
+               class="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg">
+              My PFE Applications
+            </a>
+            <a href="#" 
+               (click)="toggleMobileMenu()"
+               class="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg">
+              Settings
+            </a>
+            <button (click)="logout(); toggleMobileMenu()" 
+                    class="block w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg">
+              Sign out
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,194 @@
+<div class="quiz-take-container">
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Chargement...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <!-- Quiz non démarré -->
+  <div *ngIf="quiz && !quizStarted && !loading" class="quiz-intro">
+    <div class="card">
+      <div class="card-header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2>{{ quiz.title }}</h2>
+          <button class="btn btn-outline-secondary" (click)="exitQuiz()">
+            <i class="fas fa-arrow-left"></i> Retour
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="quiz-description">{{ quiz.description }}</p>
+        
+        <div class="quiz-info">
+          <div class="info-item">
+            <i class="fas fa-question-circle"></i>
+            <span>{{ quiz.totalQuestions }} questions</span>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-clock"></i>
+            <span>{{ quiz.durationMinutes }} minutes</span>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-star"></i>
+            <span>Score minimum: {{ quiz.passingScore }}%</span>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-trophy"></i>
+            <span>{{ quiz.totalPoints }} points au total</span>
+          </div>
+        </div>
+
+        <div class="quiz-instructions">
+          <h4>Instructions:</h4>
+          <ul>
+            <li>Vous avez <strong>{{ quiz.durationMinutes }} minutes</strong> pour complÊter ce quiz</li>
+            <li>Le quiz contient <strong>{{ quiz.totalQuestions }} questions</strong></li>
+            <li>Il y a des questions à choix multiples (QCM), vrai/faux (QCU) et à réponse courte</li>
+            <li>Vous devez obtenir au moins <strong>{{ quiz.passingScore }}%</strong> pour réussir</li>
+            <li>Une fois le quiz démarré, le chronomètre ne peut pas être mis en pause</li>
+            <li>Si le temps s'écoule, vos réponses seront automatiquement soumises</li>
+          </ul>
+        </div>
+
+        <button class="btn btn-primary btn-lg" (click)="startQuiz()">
+          <i class="fas fa-play"></i> Commencer le quiz
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz en cours -->
+  <div *ngIf="quizStarted && quiz && currentQuestion && !quizSubmitted" class="quiz-active">
+    <!-- Header avec timer -->
+    <div class="quiz-header">
+      <button class="btn btn-outline-danger btn-sm" (click)="exitQuiz()" 
+              style="margin-right: 1rem;" title="Quitter le quiz (vos réponses seront perdues)">
+        <i class="fas fa-times"></i> Quitter
+      </button>
+      
+      <div class="quiz-progress">
+        <span>Question {{ currentQuestionIndex + 1 }} / {{ quiz.questions.length }}</span>
+        <div class="progress">
+          <div class="progress-bar" [style.width.%]="progress"></div>
+        </div>
+      </div>
+      
+      <div class="quiz-timer" [class.warning]="timeWarning" [class.danger]="remainingSeconds < 60">
+        <i class="fas fa-clock"></i>
+        <span>{{ formattedTime }}</span>
+      </div>
+    </div>
+
+    <!-- Question -->
+    <div class="question-card">
+      <div class="question-header">
+        <h3>Question {{ currentQuestionIndex + 1 }}</h3>
+        <span class="question-points">{{ currentQuestion.points }} point(s)</span>
+      </div>
+
+      <div class="question-text">
+        {{ currentQuestion.question }}
+      </div>
+
+      <div class="question-type-badge">
+        <span *ngIf="currentQuestion.type === 'MULTIPLE_CHOICE'" class="badge badge-primary">
+          <i class="fas fa-list"></i> Choix multiple
+        </span>
+        <span *ngIf="currentQuestion.type === 'TRUE_FALSE'" class="badge badge-info">
+          <i class="fas fa-check-double"></i> Vrai/Faux
+        </span>
+        <span *ngIf="currentQuestion.type === 'SHORT_ANSWER'" class="badge badge-success">
+          <i class="fas fa-keyboard"></i> Réponse courte
+        </span>
+      </div>
+
+      <!-- Choix multiples ou Vrai/Faux -->
+      <div *ngIf="currentQuestion.type === 'MULTIPLE_CHOICE' || currentQuestion.type === 'TRUE_FALSE'" 
+           class="answer-options">
+        <div *ngFor="let option of currentQuestion.options; let i = index" class="option-item">
+          <label class="option-label" [class.selected]="answers[currentQuestion.id] === option">
+            <input 
+              type="radio" 
+              [name]="'question-' + currentQuestion.id"
+              [value]="option"
+              [(ngModel)]="answers[currentQuestion.id]"
+            />
+            <span class="option-text">{{ option }}</span>
+            <span class="checkmark"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Réponse courte -->
+      <div *ngIf="currentQuestion.type === 'SHORT_ANSWER'" class="answer-input">
+        <textarea 
+          [(ngModel)]="answers[currentQuestion.id]"
+          placeholder="Tapez votre réponse ici..."
+          rows="4"
+          class="form-control"
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="quiz-navigation">
+      <button 
+        class="btn btn-secondary" 
+        (click)="previousQuestion()"
+        [disabled]="currentQuestionIndex === 0"
+      >
+        <i class="fas fa-chevron-left"></i> Précédent
+      </button>
+
+      <div class="question-indicators">
+        <button 
+          *ngFor="let q of quiz.questions; let i = index"
+          class="question-indicator"
+          [class.active]="i === currentQuestionIndex"
+          [class.answered]="isQuestionAnswered(i)"
+          (click)="goToQuestion(i)"
+        >
+          {{ i + 1 }}
+        </button>
+      </div>
+
+      <button 
+        *ngIf="currentQuestionIndex < quiz.questions.length - 1"
+        class="btn btn-secondary" 
+        (click)="nextQuestion()"
+      >
+        Suivant <i class="fas fa-chevron-right"></i>
+      </button>
+
+      <button 
+        *ngIf="currentQuestionIndex === quiz.questions.length - 1"
+        class="btn btn-success" 
+        (click)="submitQuiz()"
+      >
+        <i class="fas fa-check"></i> Soumettre le quiz
+      </button>
+    </div>
+
+    <!-- Résumé -->
+    <div class="quiz-summary">
+      <p>Questions répondues: <strong>{{ answeredCount }} / {{ quiz.questions.length }}</strong></p>
+      <p *ngIf="answeredCount < quiz.questions.length" class="text-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        Vous avez {{ quiz.questions.length - answeredCount }} question(s) non répondue(s)
+      </p>
+    </div>
+  </div>
+
+  <!-- Custom Exit Modal -->
+  <app-quiz-exit-modal 
+    *ngIf="showExitModal"
+    (confirm)="confirmExit()"
+    (cancel)="cancelExit()">
+  </app-quiz-exit-modal>
+</div>
+

@@ -1,0 +1,282 @@
+<div class="space-y-6">
+  <!-- Welcome Header -->
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">
+          {{ getGreeting() }}, {{ currentUser?.firstName }}!
+        </h1>
+        <p class="text-gray-600 mt-1">Welcome back to your {{ getRoleDisplayName() }} dashboard</p>
+      </div>
+      <div class="hidden md:block">
+        <div class="flex items-center space-x-4">
+          <div class="text-right">
+            <p class="text-sm text-gray-500">{{ currentDate | date:'EEEE, MMMM d, y' }}</p>
+            <p class="text-xs text-gray-400">{{ currentDate | date:'h:mm a' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards - Only show for TEACHER and ADMIN -->
+  <div *ngIf="currentUser && (currentUser.roles.includes('TEACHER') || currentUser.roles.includes('ADMIN'))" 
+       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Total Courses</p>
+          <p class="text-2xl font-semibold text-gray-900">{{ stats.totalCourses }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Published</p>
+          <p class="text-2xl font-semibold text-gray-900">{{ stats.publishedCourses }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Students</p>
+          <p class="text-2xl font-semibold text-gray-900">{{ stats.totalStudents }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Revenue</p>
+          <p class="text-2xl font-semibold text-gray-900">${{ stats.totalRevenue | number:'1.0-0' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Consultant Welcome Message -->
+  <div *ngIf="currentUser && currentUser.roles.includes('CONSULTANT')" class="bg-white rounded-lg shadow-sm p-8 text-center">
+    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+    </div>
+    <h2 class="text-2xl font-bold text-gray-900 mb-2">Welcome to Consultant Dashboard</h2>
+    <p class="text-gray-600 mb-6">Manage consulting requests and blog content</p>
+    <div class="flex gap-4 justify-center">
+      <a routerLink="/consulting" 
+         class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700">
+        View Consulting Requests
+        <svg class="ml-2 -mr-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+        </svg>
+      </a>
+      <a routerLink="/blogs" 
+         class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+        Manage Blogs
+        <svg class="ml-2 -mr-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Recent Courses - Only show for TEACHER and ADMIN -->
+  <div *ngIf="currentUser && (currentUser.roles.includes('TEACHER') || currentUser.roles.includes('ADMIN'))" 
+       class="bg-white rounded-lg shadow-sm">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Recent Courses</h2>
+        <a routerLink="/courses" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+          View all courses
+        </a>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <div *ngIf="recentCourses.length === 0" class="text-center py-8">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No courses yet</h3>
+        <p class="mt-1 text-sm text-gray-500">Get started by creating your first course.</p>
+        <div class="mt-6">
+          <a routerLink="/courses/create" 
+             class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Create Course
+          </a>
+        </div>
+      </div>
+
+      <div *ngIf="recentCourses.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngFor="let course of recentCourses" class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200">
+          <div class="aspect-w-16 aspect-h-9 bg-gray-200">
+            <img *ngIf="course.thumbnailImage" 
+                 [src]="'http://localhost:8090/uploads/' + course.thumbnailImage" 
+                 [alt]="course.title"
+                 class="w-full h-32 object-cover">
+            <div *ngIf="!course.thumbnailImage" class="w-full h-32 bg-gray-200 flex items-center justify-center">
+              <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    [class.bg-green-100]="course.status === 'PUBLISHED'"
+                    [class.text-green-800]="course.status === 'PUBLISHED'"
+                    [class.bg-yellow-100]="course.status === 'DRAFT'"
+                    [class.text-yellow-800]="course.status === 'DRAFT'">
+                {{ course.status }}
+              </span>
+              <span class="text-sm text-gray-500">${{ course.price }}</span>
+            </div>
+            <h3 class="text-sm font-medium text-gray-900 mb-1">{{ course.title }}</h3>
+            <p class="text-xs text-gray-500 mb-2">{{ course.shortDescription }}</p>
+            <div class="flex items-center justify-between text-xs text-gray-400">
+              <span>{{ course.moduleCount }} modules</span>
+              <span>{{ course.lessonCount }} lessons</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <a *ngIf="currentUser && (currentUser.roles.includes('TEACHER') || currentUser.roles.includes('ADMIN'))"
+         routerLink="/courses/create" 
+         class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm font-medium text-gray-900">Create Course</p>
+          <p class="text-xs text-gray-500">Start a new course</p>
+        </div>
+      </a>
+
+      <a *ngIf="currentUser && (currentUser.roles.includes('TEACHER') || currentUser.roles.includes('ADMIN'))"
+         routerLink="/courses" 
+         class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm font-medium text-gray-900">View Courses</p>
+          <p class="text-xs text-gray-500">Browse all courses</p>
+        </div>
+      </a>
+
+      <a *ngIf="currentUser && currentUser.roles.includes('CONSULTANT')"
+         routerLink="/consulting" 
+         class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm font-medium text-gray-900">Consulting Requests</p>
+          <p class="text-xs text-gray-500">Manage consultations</p>
+        </div>
+      </a>
+
+      <a *ngIf="currentUser && currentUser.roles.includes('CONSULTANT')"
+         routerLink="/blogs" 
+         class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H15"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm font-medium text-gray-900">Manage Blogs</p>
+          <p class="text-xs text-gray-500">Create and edit blogs</p>
+        </div>
+      </a>
+
+      <a *ngIf="currentUser && currentUser.roles.includes('ADMIN')"
+         routerLink="/users" 
+         class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm font-medium text-gray-900">Manage Users</p>
+          <p class="text-xs text-gray-500">User administration</p>
+        </div>
+      </a>
+
+      <div class="flex items-center p-4 border border-gray-200 rounded-lg bg-gray-50 opacity-60 cursor-not-allowed">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm font-medium text-gray-500">Analytics</p>
+          <p class="text-xs text-gray-400">Coming soon</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

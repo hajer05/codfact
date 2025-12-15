@@ -1,0 +1,180 @@
+<div class="profile-container modern-page-background" *ngIf="user">
+  <div class="profile-header">
+    <div class="profile-avatar">
+      <div class="avatar-circle">
+        {{ user.firstName.charAt(0).toUpperCase() }}{{ user.lastName.charAt(0).toUpperCase() }}
+      </div>
+    </div>
+    <div class="profile-info">
+      <h1>{{ user.firstName }} {{ user.lastName }}</h1>
+      <div class="user-roles">
+        <span class="role-badge" *ngFor="let role of user.roles">
+          {{ getRoleDisplayName(role) }}
+        </span>
+      </div>
+      <p class="join-date">Member since {{ getJoinDate() }}</p>
+    </div>
+    <div class="profile-actions">
+      <button class="btn btn-primary" (click)="startEditing()" *ngIf="!isEditing">
+        <i class="fas fa-edit"></i> Edit Profile
+      </button>
+      <button class="btn btn-outline" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+  </div>
+
+  <div class="profile-content">
+    <!-- Profile Information Card -->
+    <div class="info-card">
+      <div class="card-header">
+        <h3><i class="fas fa-user"></i> Personal Information</h3>
+      </div>
+      <div class="card-body">
+        <div *ngIf="!isEditing" class="info-display">
+          <div class="info-row">
+            <label>First Name:</label>
+            <span>{{ user.firstName }}</span>
+          </div>
+          <div class="info-row">
+            <label>Last Name:</label>
+            <span>{{ user.lastName }}</span>
+          </div>
+          <div class="info-row">
+            <label>Email:</label>
+            <span>{{ user.email }}</span>
+          </div>
+          <div class="info-row">
+            <label>User ID:</label>
+            <span>#{{ user.id }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="isEditing" class="edit-form">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input 
+              type="text" 
+              id="firstName"
+              [(ngModel)]="editForm.firstName" 
+              class="form-control"
+              placeholder="Enter your first name">
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input 
+              type="text" 
+              id="lastName"
+              [(ngModel)]="editForm.lastName" 
+              class="form-control"
+              placeholder="Enter your last name">
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input 
+              type="email" 
+              id="email"
+              [(ngModel)]="editForm.email" 
+              class="form-control"
+              placeholder="Enter your email">
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-success" (click)="saveProfile()">
+              <i class="fas fa-save"></i> Save Changes
+            </button>
+            <button class="btn btn-outline" (click)="cancelEditing()">
+              <i class="fas fa-times"></i> Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account Statistics Card -->
+    <div class="stats-card">
+      <div class="card-header">
+        <h3><i class="fas fa-chart-bar"></i> Account Statistics</h3>
+      </div>
+      <div class="card-body">
+        <div *ngIf="loading" class="loading-stats">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Loading statistics...</p>
+        </div>
+        <div *ngIf="!loading" class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-icon">
+              <i class="fas fa-book"></i>
+            </div>
+            <div class="stat-info">
+              <h4>{{ statistics.coursesEnrolled }}</h4>
+              <p>Courses Enrolled</p>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">
+              <i class="fas fa-certificate"></i>
+            </div>
+            <div class="stat-info">
+              <h4>{{ statistics.certificatesEarned }}</h4>
+              <p>Certificates Earned</p>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-info">
+              <h4>{{ statistics.learningTime }}</h4>
+              <p>Learning Time</p>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">
+              <i class="fas fa-trophy"></i>
+            </div>
+            <div class="stat-info">
+              <h4>{{ statistics.achievements }}</h4>
+              <p>Achievements</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity Card -->
+    <div class="activity-card">
+      <div class="card-header">
+        <h3><i class="fas fa-history"></i> Recent Activity</h3>
+      </div>
+      <div class="card-body">
+        <div class="activity-list">
+          <div class="activity-item">
+            <div class="activity-icon">
+              <i class="fas fa-user-plus"></i>
+            </div>
+            <div class="activity-info">
+              <p><strong>Account Created</strong></p>
+              <span class="activity-date">{{ getJoinDate() }}</span>
+            </div>
+          </div>
+          <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>No recent activity to display</p>
+            <small>Start learning to see your progress here!</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="not-authenticated" *ngIf="!user">
+  <div class="auth-message">
+    <i class="fas fa-lock"></i>
+    <h2>Access Denied</h2>
+    <p>Please log in to view your profile.</p>
+    <button class="btn btn-primary" (click)="router.navigate(['/login'])">
+      <i class="fas fa-sign-in-alt"></i> Go to Login
+    </button>
+  </div>
+</div>

@@ -1,0 +1,188 @@
+<div class="quiz-results-container">
+  <!-- Header -->
+  <div class="header">
+    <button class="back-btn" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i>
+      Retour
+    </button>
+    <div>
+      <h1>Résultats du Quiz</h1>
+      <p *ngIf="quiz">{{ quiz.title }}</p>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Chargement des résultats...</p>
+  </div>
+
+  <!-- Quiz Info -->
+  <div *ngIf="quiz && !loading" class="quiz-info-card">
+    <div class="info-grid">
+      <div class="info-item">
+        <i class="fas fa-question-circle"></i>
+        <div>
+          <span class="label">Questions</span>
+          <span class="value">{{ quiz.totalQuestions }}</span>
+        </div>
+      </div>
+      <div class="info-item">
+        <i class="fas fa-clock"></i>
+        <div>
+          <span class="label">Durée</span>
+          <span class="value">{{ quiz.durationMinutes }} min</span>
+        </div>
+      </div>
+      <div class="info-item">
+        <i class="fas fa-star"></i>
+        <div>
+          <span class="label">Score minimum</span>
+          <span class="value">{{ quiz.passingScore }}%</span>
+        </div>
+      </div>
+      <div class="info-item">
+        <i class="fas fa-trophy"></i>
+        <div>
+          <span class="label">Points totaux</span>
+          <span class="value">{{ quiz.totalPoints }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics -->
+  <div *ngIf="!loading && attempts.length > 0" class="statistics-section">
+    <h2>Statistiques</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <i class="fas fa-users"></i>
+        <div>
+          <span class="stat-value">{{ totalAttempts }}</span>
+          <span class="stat-label">Tentatives totales</span>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <span class="stat-value">{{ passedAttempts }}</span>
+          <span class="stat-label">Réussis</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <i class="fas fa-percentage"></i>
+        <div>
+          <span class="stat-value">{{ getPassRate() }}%</span>
+          <span class="stat-label">Taux de réussite</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <i class="fas fa-chart-line"></i>
+        <div>
+          <span class="stat-value">{{ averageScore }}%</span>
+          <span class="stat-label">Score moyen</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <i class="fas fa-arrow-up"></i>
+        <div>
+          <span class="stat-value">{{ highestScore }}%</span>
+          <span class="stat-label">Meilleur score</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <i class="fas fa-arrow-down"></i>
+        <div>
+          <span class="stat-value">{{ lowestScore }}%</span>
+          <span class="stat-label">Score le plus bas</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Table -->
+  <div *ngIf="!loading" class="results-section">
+    <div class="section-header">
+      <h2>Résultats détaillés</h2>
+      <button class="btn btn-secondary" (click)="exportResults()">
+        <i class="fas fa-download"></i>
+        Exporter (CSV)
+      </button>
+    </div>
+
+    <!-- No Results -->
+    <div *ngIf="attempts.length === 0" class="empty-state">
+      <i class="fas fa-clipboard-list"></i>
+      <h3>Aucune tentative encore</h3>
+      <p>Les résultats des étudiants apparaîtront ici une fois qu'ils auront passé le quiz</p>
+    </div>
+
+    <!-- Results Table -->
+    <div *ngIf="attempts.length > 0" class="table-container">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Étudiant</th>
+            <th>Date</th>
+            <th>Score</th>
+            <th>Points</th>
+            <th>Durée</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let attempt of attempts" [class]="getScoreClass(attempt.score)">
+            <td>
+              <div class="student-info">
+                <div class="student-avatar">
+                  {{ (attempt.userName || 'U').charAt(0).toUpperCase() }}
+                </div>
+                <span>{{ attempt.userName || 'Utilisateur inconnu' }}</span>
+              </div>
+            </td>
+            <td>{{ attempt.completedAt | date:'short' }}</td>
+            <td>
+              <div class="score-cell">
+                <div class="score-badge" [class]="getScoreClass(attempt.score)">
+                  {{ attempt.score }}%
+                </div>
+                <div class="score-bar">
+                  <div 
+                    class="score-fill" 
+                    [style.width.%]="attempt.score"
+                    [class]="getScoreClass(attempt.score)"
+                  ></div>
+                </div>
+              </div>
+            </td>
+            <td>{{ attempt.earnedPoints }} / {{ attempt.totalPoints }}</td>
+            <td>
+              <span class="duration">
+                <i class="fas fa-clock"></i>
+                {{ calculateDuration(attempt) }}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge" [class.passed]="attempt.passed">
+                <i *ngIf="attempt.passed" class="fas fa-check-circle"></i>
+                <i *ngIf="!attempt.passed" class="fas fa-times-circle"></i>
+                {{ attempt.passed ? 'Réussi' : 'Échoué' }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+

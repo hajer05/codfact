@@ -1,0 +1,832 @@
+<div class="min-h-screen modern-page-background">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center py-20">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+    <div class="bg-white rounded-lg shadow-sm border p-8">
+      <svg class="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+      </svg>
+      <h3 class="mt-4 text-lg font-medium text-gray-900">Course not found</h3>
+      <p class="mt-2 text-gray-600">The course you're looking for doesn't exist or has been removed.</p>
+      <button
+        (click)="goBack()"
+        class="mt-4 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+      >
+        Back to Courses
+      </button>
+    </div>
+  </div>
+
+  <!-- Course Details Content -->
+  <div *ngIf="course && !loading && !error">
+    <!-- Hero Section -->
+    <div class="bg-white shadow-sm border-b">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Breadcrumb -->
+        <nav class="flex mb-6" aria-label="Breadcrumb">
+          <ol class="flex items-center space-x-2">
+            <li>
+              <button (click)="goBack()" class="text-gray-500 hover:text-gray-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+              </button>
+            </li>
+            <li>
+              <button (click)="goBack()" class="text-gray-500 hover:text-gray-700 text-sm">Courses</button>
+            </li>
+            <li class="flex items-center">
+              <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="ml-2 text-sm text-gray-900 truncate">{{ course.title }}</span>
+            </li>
+          </ol>
+        </nav>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Course Info -->
+          <div class="lg:col-span-2">
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex-1 min-w-0">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2 break-words">{{ course.title }}</h1>
+                <p class="text-gray-600 mb-4 break-words overflow-wrap-anywhere">{{ course.description }}</p>
+                
+                <div class="flex items-center space-x-4 mb-4">
+                  <span
+                    [class]="getLevelBadgeClass(course.level)"
+                    class="px-3 py-1 text-sm font-medium rounded-full"
+                  >
+                    {{ course.level }}
+                  </span>
+                  <span class="text-sm text-gray-600">{{ course.category }}</span>
+                  <span *ngIf="course.language" class="text-sm text-gray-600">{{ course.language }}</span>
+                </div>
+
+                <div class="flex items-center space-x-6 text-sm text-gray-600">
+                  <!-- Rating -->
+                  <div *ngIf="course.rating" class="flex items-center space-x-1">
+                    <div class="flex items-center">
+                      <svg *ngFor="let star of getRatingStars(course.rating)" 
+                           class="w-4 h-4" 
+                           [class.text-yellow-400]="star === 'filled'"
+                           [class.text-gray-300]="star === 'empty'"
+                           fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                      </svg>
+                    </div>
+                    <span>{{ course.rating }} rating</span>
+                  </div>
+                  
+                  <!-- Students -->
+                  <div *ngIf="course.enrollmentCount" class="flex items-center space-x-2">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                    </svg>
+                    <span>{{ course.enrollmentCount }} students</span>
+                  </div>
+
+                  <!-- Duration -->
+                  <div class="flex items-center space-x-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>{{ getTotalDuration() || course.duration || 0 }}h total</span>
+                  </div>
+
+                  <!-- Lessons -->
+                  <div class="flex items-center space-x-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.47.901-6.06 2.377C5.482 17.465 5.99 17.9 6.5 18H17.5c.51-.1 1.018-.535.56-.623z"></path>
+                    </svg>
+                    <span>{{ getTotalLessons() || course.lessonCount || 0 }} lessons</span>
+                  </div>
+                </div>
+
+                <div class="mt-4">
+                  <p class="text-sm text-gray-600">
+                    Created by <span class="font-medium">{{ course.teacherName || course.instructor }}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Course Preview & Enrollment -->
+          <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-lg border p-6 sticky top-6">
+              <!-- Course Image/Video -->
+              <div class="aspect-video bg-gray-200 rounded-lg overflow-hidden mb-4">
+                <img
+                  *ngIf="course.thumbnailImage"
+                  [src]="'http://localhost:8090/uploads/' + course.thumbnailImage"
+                  [alt]="course.title"
+                  class="w-full h-full object-cover"
+                >
+                <div *ngIf="!course.thumbnailImage" class="w-full h-full flex items-center justify-center bg-gray-100">
+                  <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Price -->
+              <div class="text-center mb-6">
+                <div class="text-3xl font-bold text-gray-900 mb-2">
+                  <span *ngIf="course.price === 0" class="text-green-600">Free</span>
+                  <span *ngIf="course.price > 0">${{ course.price }}</span>
+                </div>
+              </div>
+
+              <!-- Enrollment Error Message -->
+              <div *ngIf="enrollmentError" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
+                {{ enrollmentError }}
+              </div>
+
+              <!-- Enroll Button -->
+              <button
+                *ngIf="!isEnrolled"
+                (click)="enrollInCourse()"
+                [disabled]="enrollmentLoading"
+                class="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-lg font-medium text-lg transition-colors mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span *ngIf="enrollmentLoading">Enrolling...</span>
+                <span *ngIf="!enrollmentLoading">{{ course.price === 0 ? 'Enroll for Free' : 'Enroll Now - $' + course.price }}</span>
+              </button>
+
+              <!-- Unenroll Button -->
+              <button
+                *ngIf="isEnrolled"
+                (click)="unenrollFromCourse()"
+                [disabled]="enrollmentLoading"
+                class="w-full bg-gray-600 hover:bg-gray-700 text-white py-3 px-4 rounded-lg font-medium text-lg transition-colors mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span *ngIf="enrollmentLoading">Processing...</span>
+                <span *ngIf="!enrollmentLoading">Unenroll from Course</span>
+              </button>
+
+              <!-- Enrolled Status -->
+              <div *ngIf="isEnrolled" class="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 text-green-800 rounded-lg text-center">
+                <div class="flex items-center justify-center space-x-2">
+                  <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                  <span class="font-semibold text-sm">You are enrolled in this course</span>
+                </div>
+                <div class="mt-2 text-xs text-green-600">
+                  Progress: {{ getCourseProgressPercentage() }}%
+                </div>
+              </div>
+
+
+              <!-- Course Stats -->
+              <div class="space-y-3 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Modules:</span>
+                  <span class="font-medium">{{ course.moduleCount || courseDetails?.modules?.length || 0 }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Lessons:</span>
+                  <span class="font-medium">{{ getTotalLessons() || course.lessonCount || 0 }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Duration:</span>
+                  <span class="font-medium">{{ getTotalDuration() || course.duration || 0 }} hours</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Level:</span>
+                  <span class="font-medium">{{ course.level }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Language:</span>
+                  <span class="font-medium">English</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Course Progress & Actions Section (NEW LAYOUT) -->
+    <div *ngIf="isEnrolled" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Progress Card -->
+        <div class="bg-white rounded-xl shadow-lg border-2 border-gray-200 p-6">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="p-3 bg-green-100 rounded-full">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-bold text-gray-900">Votre Progression</h3>
+              <p class="text-sm text-gray-600">Continuez votre apprentissage</p>
+            </div>
+          </div>
+          
+          <div class="space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-sm font-medium text-gray-700">Progression du cours</span>
+              <span class="text-2xl font-bold text-green-600">{{ getCourseProgressPercentage() }}%</span>
+            </div>
+            
+            <div class="w-full bg-gray-200 rounded-full h-4 shadow-inner">
+              <div class="bg-gradient-to-r from-green-500 to-green-600 h-4 rounded-full transition-all duration-500 ease-out flex items-center justify-center" 
+                   [style.width.%]="getCourseProgressPercentage()">
+                <span *ngIf="getCourseProgressPercentage() > 15" class="text-xs text-white font-bold">{{ getCourseProgressPercentage() }}%</span>
+              </div>
+            </div>
+            
+            <div *ngIf="getCourseProgressPercentage() < 100" class="text-sm text-gray-600">
+              <div class="flex items-center space-x-2">
+                <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                <span>{{ 100 - getCourseProgressPercentage() }}% restant à compléter</span>
+              </div>
+            </div>
+            
+            <div *ngIf="getCourseProgressPercentage() === 100" class="mt-4 p-4 bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-400 text-green-800 rounded-lg text-center">
+              <div class="text-2xl mb-2">🎉</div>
+              <div class="font-bold text-lg">Félicitations !</div>
+              <div class="text-sm">Vous avez terminé toutes les leçons !</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Quiz Card -->
+        <div *ngIf="hasQuiz && getCourseProgressPercentage() === 100" 
+             class="bg-white rounded-xl shadow-lg border-2 p-6"
+             [class.border-red-200]="!hasPassedQuiz"
+             [class.border-green-200]="hasPassedQuiz">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="p-3 rounded-full" 
+                 [class.bg-red-100]="!hasPassedQuiz"
+                 [class.bg-green-100]="hasPassedQuiz">
+              <svg class="w-6 h-6" 
+                   [class.text-red-600]="!hasPassedQuiz"
+                   [class.text-green-600]="hasPassedQuiz"
+                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-bold text-gray-900">Quiz Final</h3>
+              <p class="text-sm text-gray-600">
+                <span *ngIf="!hasPassedQuiz">Testez vos connaissances</span>
+                <span *ngIf="hasPassedQuiz" class="text-green-600 font-medium">✓ Réussi !</span>
+              </p>
+            </div>
+          </div>
+          
+          <!-- Quiz Not Passed -->
+          <div *ngIf="!hasPassedQuiz" class="space-y-4">
+            <div class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-gray-700">
+              <p class="font-medium text-red-900 mb-2">📋 Détails du quiz :</p>
+              <ul class="space-y-1 text-xs">
+                <li *ngIf="courseQuiz">• <strong>Questions :</strong> {{ courseQuiz.totalQuestions }}</li>
+                <li *ngIf="courseQuiz">• <strong>Durée :</strong> {{ courseQuiz.durationMinutes }} minutes</li>
+                <li *ngIf="courseQuiz">• <strong>Score requis :</strong> {{ courseQuiz.passingScore }}%</li>
+                <li>• <strong>Types :</strong> QCM, QCU, réponses courtes</li>
+              </ul>
+            </div>
+            
+            <button (click)="startQuiz()"
+                    class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 px-4 rounded-lg font-bold text-sm transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
+              <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Commencer le Quiz
+            </button>
+          </div>
+          
+          <!-- Quiz Passed -->
+          <div *ngIf="hasPassedQuiz" class="space-y-4">
+            <div class="p-4 bg-green-50 border-2 border-green-300 rounded-lg text-center">
+              <div class="text-3xl mb-2">✅</div>
+              <div class="text-green-900 font-bold mb-1">Quiz réussi !</div>
+              <div class="text-sm text-green-700">Vous pouvez maintenant obtenir votre certificat</div>
+            </div>
+            
+            <button *ngIf="lastQuizAttempt"
+                    (click)="viewQuizResults()"
+                    class="w-full bg-white border-2 border-green-500 text-green-700 hover:bg-green-50 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200 shadow-md hover:shadow-lg">
+              <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+              Voir mes résultats
+            </button>
+          </div>
+        </div>
+        
+        <!-- Certificate Card -->
+        <div *ngIf="getCourseProgressPercentage() === 100 && (!hasQuiz || hasPassedQuiz)" 
+             class="bg-white rounded-xl shadow-lg border-2 p-6"
+             [class.border-blue-200]="!hasCertificate"
+             [class.border-green-200]="hasCertificate">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="p-3 rounded-full" 
+                 [class.bg-blue-100]="!hasCertificate"
+                 [class.bg-green-100]="hasCertificate">
+              <svg class="w-6 h-6" 
+                   [class.text-blue-600]="!hasCertificate"
+                   [class.text-green-600]="hasCertificate"
+                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-bold text-gray-900">Certificat</h3>
+              <p class="text-sm text-gray-600">
+                <span *ngIf="!hasCertificate">Obtenez votre certificat</span>
+                <span *ngIf="hasCertificate" class="text-green-600 font-medium">✓ Généré !</span>
+              </p>
+            </div>
+          </div>
+          
+          <div class="space-y-4">
+            <!-- Generate Certificate Button -->
+            <div *ngIf="!hasCertificate && !certificateLoading">
+              <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-900 mb-4">
+                <p class="font-medium mb-1">🏆 Félicitations !</p>
+                <p class="text-xs">Vous avez complété toutes les exigences du cours. Générez votre certificat officiel !</p>
+              </div>
+              
+              <button (click)="generateCertificate()"
+                      class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 px-4 rounded-lg font-bold text-sm transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Générer mon Certificat
+              </button>
+            </div>
+            
+            <!-- Loading State -->
+            <div *ngIf="certificateLoading" class="text-center py-6">
+              <svg class="animate-spin w-10 h-10 mx-auto text-blue-600 mb-3" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <p class="text-sm text-gray-600 font-medium">Génération en cours...</p>
+            </div>
+            
+            <!-- Download Certificate Button -->
+            <div *ngIf="hasCertificate && certificate">
+              <div class="p-4 bg-green-50 border-2 border-green-300 rounded-lg text-center mb-4">
+                <div class="text-3xl mb-2">🏆</div>
+                <div class="text-green-900 font-bold mb-1">Certificat prêt !</div>
+                <div class="text-xs text-green-700">Délivré le {{ certificate.issuedAt | date:'dd/MM/yyyy' }}</div>
+              </div>
+              
+              <button (click)="downloadCertificate()"
+                      class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 px-4 rounded-lg font-bold text-sm transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                Télécharger le Certificat
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Complaint/Help Card -->
+        <div class="bg-white rounded-xl shadow-lg border-2 border-orange-200 p-6">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="p-3 bg-orange-100 rounded-full">
+              <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-bold text-gray-900">Besoin d'aide ?</h3>
+              <p class="text-sm text-gray-600">Contactez l'instructeur</p>
+            </div>
+          </div>
+          
+          <div class="space-y-4">
+            <div class="p-3 bg-orange-50 border border-orange-200 rounded-lg text-sm">
+              <p class="text-gray-700 mb-3">
+                <span class="font-medium text-orange-900">💡 Vous avez un problème ou une question ?</span><br/>
+                <span class="text-xs">Envoyez une réclamation à l'instructeur du cours.</span>
+              </p>
+              
+              <div class="flex space-x-2">
+                <button (click)="showComplaintForm = !showComplaintForm"
+                        class="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 shadow-md hover:shadow-lg">
+                  <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                  </svg>
+                  {{ showComplaintForm ? 'Annuler' : 'Signaler' }}
+                </button>
+                
+                <a routerLink="/complaints" 
+                   class="flex-1 text-center bg-white border-2 border-orange-500 text-orange-700 hover:bg-orange-50 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200">
+                  <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                  </svg>
+                  Mes réclamations
+                </a>
+              </div>
+            </div>
+            
+            <!-- Complaint Form -->
+            <div *ngIf="showComplaintForm" class="p-4 bg-orange-50 border-2 border-orange-300 rounded-lg">
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1">Sujet</label>
+                  <input type="text" 
+                         [(ngModel)]="complaintSubject"
+                         placeholder="Description brève du problème"
+                         class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1">Message</label>
+                  <textarea 
+                         [(ngModel)]="complaintMessage"
+                         rows="3"
+                         placeholder="Décrivez votre problème en détail..."
+                         class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
+                </div>
+                <button (click)="submitComplaint()"
+                        [disabled]="complaintLoading || !complaintSubject.trim() || !complaintMessage.trim()"
+                        class="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded-md font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                  <span *ngIf="complaintLoading">Envoi...</span>
+                  <span *ngIf="!complaintLoading">Envoyer la Réclamation</span>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Success Message -->
+            <div *ngIf="complaintSuccess" class="p-3 bg-green-100 border-2 border-green-400 text-green-800 rounded-lg text-sm font-medium text-center">
+              ✓ Réclamation envoyée ! L'instructeur sera notifié.
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- Course Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-10">
+          <!-- Description -->
+          <div class="bg-white rounded-lg shadow-sm border p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">About this course</h2>
+            <div class="prose prose-gray max-w-none">
+              <p class="text-gray-700 leading-relaxed break-words overflow-wrap-anywhere">{{ course.description }}</p>
+            </div>
+          </div>
+
+          <!-- Course Content/Modules -->
+          <div *ngIf="courseDetails?.modules && courseDetails.modules.length > 0" class="bg-white rounded-lg shadow-md border-2 overflow-hidden"
+               [class.border-green-200]="isEnrolled"
+               [class.border-blue-200]="!isEnrolled">
+            <div class="p-6 border-b-2 border-gray-200 bg-gradient-to-r"
+                 [class.from-green-50]="isEnrolled"
+                 [class.to-emerald-50]="isEnrolled"
+                 [class.from-blue-50]="!isEnrolled"
+                 [class.to-indigo-50]="!isEnrolled">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Course Content</h2>
+                  <p class="text-gray-600">{{ getTotalLessons() }} lessons • {{ getTotalDuration() }} hours total</p>
+                </div>
+                <div *ngIf="isEnrolled" class="text-right">
+                  <div class="text-sm font-medium text-gray-700 mb-1">Your Progress</div>
+                  <div class="text-2xl font-bold text-green-600">{{ getCourseProgressPercentage() }}%</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="divide-y-2 divide-gray-100">
+              <div *ngFor="let module of courseDetails.modules; let i = index" class="group">
+                <!-- Module Header -->
+                <div class="p-6 bg-gradient-to-r border-l-4 transition-all duration-300"
+                     [class.from-gray-50]="!isEnrolled || getModuleProgress(module) < 100"
+                     [class.to-gray-100]="!isEnrolled || getModuleProgress(module) < 100"
+                     [class.from-green-50]="isEnrolled && getModuleProgress(module) === 100"
+                     [class.to-emerald-50]="isEnrolled && getModuleProgress(module) === 100"
+                     [class.border-blue-500]="!isEnrolled || getModuleProgress(module) < 100"
+                     [class.border-green-500]="isEnrolled && getModuleProgress(module) === 100">
+                  <div class="flex items-center justify-between gap-6">
+                    <div class="flex-1">
+                      <h3 class="text-lg font-semibold text-gray-900 mb-3">
+                        <span class="inline-flex items-center justify-center w-10 h-10 text-white rounded-full text-sm font-bold mr-3 shadow-md transition-all duration-300"
+                              [class.bg-blue-500]="!isEnrolled || getModuleProgress(module) < 100"
+                              [class.bg-green-500]="isEnrolled && getModuleProgress(module) === 100">
+                          {{ i + 1 }}
+                        </span>
+                        {{ module.title }}
+                        <span *ngIf="isEnrolled && getModuleProgress(module) === 100" 
+                              class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-green-500 text-white">
+                          ✓ COMPLETE
+                        </span>
+                      </h3>
+                      <p *ngIf="module.description" class="text-gray-600 mb-4 leading-relaxed">{{ module.description }}</p>
+                      <div class="flex items-center space-x-6 text-sm text-gray-500">
+                        <div class="flex items-center space-x-1.5">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.47.901-6.06 2.377C5.482 17.465 5.99 17.9 6.5 18H17.5c.51-.1 1.018-.535.56-.623z"></path>
+                          </svg>
+                          <span class="font-medium">{{ module.lessons?.length || 0 }} lessons</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                          <span class="font-medium">{{ getModuleDuration(module) }} min</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Module Progress -->
+                    <div *ngIf="isEnrolled" class="text-right flex-shrink-0">
+                      <div class="text-sm font-bold text-gray-900 mb-2">
+                        {{ getModuleProgress(module) }}%
+                      </div>
+                      <div class="w-32 bg-gray-200 rounded-full h-3 shadow-inner">
+                        <div class="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full transition-all duration-500 flex items-center justify-end pr-2" 
+                             [style.width.%]="getModuleProgress(module)">
+                          <span *ngIf="getModuleProgress(module) > 15" class="text-xs text-white font-bold">{{ getModuleProgress(module) }}%</span>
+                        </div>
+                      </div>
+                      <div class="text-xs text-gray-500 mt-1">Complete</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Lessons -->
+                <div *ngIf="module.lessons && module.lessons.length > 0" class="bg-white pl-4">
+                  <div *ngFor="let lesson of module.lessons; let j = index" 
+                       class="group/lesson border-l-4 border-transparent hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 p-4 mb-2 rounded-r-lg"
+                       [class.border-green-500]="isLessonCompleted(lesson.id)"
+                       [class.bg-gradient-to-r]="isLessonCompleted(lesson.id)"
+                       [class.from-green-50]="isLessonCompleted(lesson.id)"
+                       [class.to-emerald-50]="isLessonCompleted(lesson.id)"
+                       [class.border-blue-400]="hasVideo(lesson) && !isLessonCompleted(lesson.id)"
+                       [class.bg-blue-50]="hasVideo(lesson) && !isLessonCompleted(lesson.id)"
+                       [class.shadow-sm]="isLessonCompleted(lesson.id)">
+                    
+                    <div class="p-4 flex items-center justify-between">
+                      <div class="flex items-center space-x-4 flex-1">
+                        <!-- Lesson Number / Completion Badge -->
+                        <div class="flex-shrink-0 w-12 h-12 rounded-full border-4 flex items-center justify-center text-xs font-bold transition-all duration-300 relative"
+                             [class.bg-gradient-to-br]="isLessonCompleted(lesson.id)"
+                             [class.from-green-500]="isLessonCompleted(lesson.id)"
+                             [class.to-green-600]="isLessonCompleted(lesson.id)"
+                             [class.border-green-600]="isLessonCompleted(lesson.id)"
+                             [class.text-white]="isLessonCompleted(lesson.id)"
+                             [class.shadow-xl]="isLessonCompleted(lesson.id)"
+                             [class.scale-110]="isLessonCompleted(lesson.id)"
+                             [class.border-blue-400]="hasVideo(lesson) && !isLessonCompleted(lesson.id)"
+                             [class.text-blue-600]="hasVideo(lesson) && !isLessonCompleted(lesson.id)"
+                             [class.bg-blue-50]="hasVideo(lesson) && !isLessonCompleted(lesson.id)"
+                             [class.border-gray-300]="!hasVideo(lesson) && !isLessonCompleted(lesson.id)"
+                             [class.text-gray-600]="!hasVideo(lesson) && !isLessonCompleted(lesson.id)"
+                             [class.bg-gray-50]="!hasVideo(lesson) && !isLessonCompleted(lesson.id)">
+                          
+                          <!-- Completion - DONE Badge -->
+                          <span *ngIf="isLessonCompleted(lesson.id)" 
+                                class="text-[10px] font-extrabold tracking-wider text-white">
+                            DONE
+                          </span>
+                          
+                          <!-- Lesson Number -->
+                          <span *ngIf="!isLessonCompleted(lesson.id)">{{ j + 1 }}</span>
+                          
+                          <!-- Success Ring Animation -->
+                          <div *ngIf="isLessonCompleted(lesson.id)" 
+                               class="absolute inset-0 rounded-full border-4 border-green-300 animate-ping opacity-60"></div>
+                        </div>
+                        
+                        <!-- Lesson Content -->
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center space-x-2 mb-1">
+                            <h4 class="text-base font-medium text-gray-900 truncate"
+                                [class.line-through]="isLessonCompleted(lesson.id)"
+                                [class.text-gray-500]="isLessonCompleted(lesson.id)">
+                              {{ lesson.title }}
+                            </h4>
+                            
+                            <!-- Video Badge with Completion Status -->
+                            <span *ngIf="hasVideo(lesson)" 
+                                  class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300 shadow-sm"
+                                  [class.bg-green-500]="isLessonCompleted(lesson.id)"
+                                  [class.text-white]="isLessonCompleted(lesson.id)"
+                                  [class.bg-blue-100]="!isLessonCompleted(lesson.id)"
+                                  [class.text-blue-800]="!isLessonCompleted(lesson.id)">
+                              
+                              <!-- Completed Video Icon -->
+                              <svg *ngIf="isLessonCompleted(lesson.id)" class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                              </svg>
+                              
+                              <!-- Regular Video Icon -->
+                              <svg *ngIf="!isLessonCompleted(lesson.id)" class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M8 5v14l11-7z"/>
+                              </svg>
+                              
+                              <span *ngIf="isLessonCompleted(lesson.id)">DONE</span>
+                              <span *ngIf="!isLessonCompleted(lesson.id)">Video</span>
+                            </span>
+                          </div>
+                          
+                          <p *ngIf="lesson.description" 
+                             class="text-sm text-gray-600 line-clamp-2"
+                             [class.text-gray-400]="isLessonCompleted(lesson.id)">
+                            {{ lesson.description }}
+                          </p>
+                          
+                          <!-- Access Message for Paid Lessons -->
+                          <div *ngIf="!canViewLessonContent(lesson) && course && course.price > 0 && !lesson.isFree && !lesson.free"
+                               class="mt-2 text-xs text-red-600 font-medium flex items-center space-x-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                            <span>Inscription requise pour accéder au contenu</span>
+                          </div>
+                          
+                          <div class="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                            <span *ngIf="lesson.videoDuration || lesson.duration" class="flex items-center space-x-1">
+                              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                              </svg>
+                              <span>
+                                <span *ngIf="getLessonDurationInMinutes(lesson) >= 60">
+                                  {{ Math.floor(getLessonDurationInMinutes(lesson) / 60) }}h {{ getLessonDurationInMinutes(lesson) % 60 }}min
+                                </span>
+                                <span *ngIf="getLessonDurationInMinutes(lesson) < 60">
+                                  {{ getLessonDurationInMinutes(lesson) }}min
+                                </span>
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Action Buttons -->
+                      <div class="flex items-center space-x-3">
+                        <!-- Play Button -->
+                        <button *ngIf="hasVideo(lesson) && canViewLessonContent(lesson)"
+                                (click)="playVideo(lesson)"
+                                class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 group-hover/lesson:scale-110"
+                                [class.bg-green-500]="isLessonCompleted(lesson.id)"
+                                [class.hover:bg-green-600]="isLessonCompleted(lesson.id)"
+                                [class.bg-blue-500]="!isLessonCompleted(lesson.id)"
+                                [class.hover:bg-blue-600]="!isLessonCompleted(lesson.id)"
+                                title="Play video">
+                          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M8 5v14l11-7z"/>
+                          </svg>
+                        </button>
+                        
+                        <!-- Lock Icon for Paid Lessons -->
+                        <div *ngIf="hasVideo(lesson) && !canViewLessonContent(lesson)"
+                             class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-300 cursor-not-allowed"
+                             title="Inscription requise pour accéder à cette vidéo">
+                          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                          </svg>
+                        </div>
+                        
+                        <!-- Complete Button / Completed Indicator -->
+                        <button *ngIf="isEnrolled"
+                                (click)="!isLessonCompleted(lesson.id) && markLessonAsCompleted(lesson.id)"
+                                [disabled]="isLessonCompleted(lesson.id)"
+                                class="flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 group shadow-md"
+                                [class.bg-green-500]="isLessonCompleted(lesson.id)"
+                                [class.border-green-600]="isLessonCompleted(lesson.id)"
+                                [class.text-white]="isLessonCompleted(lesson.id)"
+                                [class.border-gray-300]="!isLessonCompleted(lesson.id)"
+                                [class.bg-white]="!isLessonCompleted(lesson.id)"
+                                [class.hover:border-green-500]="!isLessonCompleted(lesson.id)"
+                                [class.hover:bg-green-50]="!isLessonCompleted(lesson.id)"
+                                [class.cursor-pointer]="!isLessonCompleted(lesson.id)"
+                                [class.cursor-default]="isLessonCompleted(lesson.id)"
+                                [class.scale-110]="isLessonCompleted(lesson.id)"
+                                [title]="isLessonCompleted(lesson.id) ? 'Leçon complétée' : 'Marquer comme complétée'">
+                          <svg *ngIf="isLessonCompleted(lesson.id)" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                          </svg>
+                          <svg *ngIf="!isLessonCompleted(lesson.id)" class="w-5 h-5 text-gray-400 group-hover:text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+          <!-- Instructor -->
+          <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Instructor</h3>
+            <div class="flex items-center space-x-3">
+              <div class="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center font-medium">
+                {{ (course.teacherName || course.instructor || 'T').charAt(0).toUpperCase() }}
+              </div>
+              <div>
+                <h4 class="font-medium text-gray-900">{{ course.teacherName || course.instructor }}</h4>
+                <p class="text-sm text-gray-600">Course Instructor</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tags -->
+          <div *ngIf="course.tags && course.tags.length > 0" class="bg-white rounded-lg shadow-sm border p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Technologies</h3>
+            <div class="flex flex-wrap gap-2">
+              <span *ngFor="let tag of course.tags" 
+                    class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full">
+                {{ tag }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Video Player Modal -->
+<div *ngIf="showVideoPlayer" 
+     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+     (click)="closeVideoPlayer()">
+  <div class="relative bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+       (click)="$event.stopPropagation()">
+    
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between p-4 border-b border-gray-200">
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900">{{ currentLessonTitle }}</h3>
+      </div>
+      <button (click)="closeVideoPlayer()" 
+              class="text-gray-400 hover:text-gray-600 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Video Player -->
+    <div class="aspect-video bg-black">
+      <video *ngIf="currentVideoUrl" 
+             [src]="currentVideoUrl" 
+             controls 
+             autoplay
+             class="w-full h-full">
+        Your browser does not support the video tag.
+      </video>
+      <div *ngIf="!currentVideoUrl" 
+           class="flex items-center justify-center h-full text-white">
+        <p>Video not available</p>
+      </div>
+    </div>
+
+    <!-- Video Info -->
+    <div class="p-4 bg-gray-50">
+      <div class="flex items-center justify-between">
+        <div>
+          <h4 class="font-medium text-gray-900">{{ currentLessonTitle }}</h4>
+          <p class="text-sm text-gray-600">{{ currentLessonDescription }}</p>
+        </div>
+        
+        <!-- Mark as Completed Button in Video Player -->
+        <div *ngIf="isEnrolled && currentLessonId">
+          <button 
+                  (click)="!isLessonCompleted(currentLessonId) && markLessonAsCompleted(currentLessonId)"
+                  [disabled]="isLessonCompleted(currentLessonId)"
+                  class="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 shadow-md"
+                  [class.bg-green-600]="!isLessonCompleted(currentLessonId)"
+                  [class.hover:bg-green-700]="!isLessonCompleted(currentLessonId)"
+                  [class.text-white]="!isLessonCompleted(currentLessonId)"
+                  [class.transform]="!isLessonCompleted(currentLessonId)"
+                  [class.hover:scale-105]="!isLessonCompleted(currentLessonId)"
+                  [class.bg-green-500]="isLessonCompleted(currentLessonId)"
+                  [class.text-white]="isLessonCompleted(currentLessonId)"
+                  [class.cursor-pointer]="!isLessonCompleted(currentLessonId)"
+                  [class.cursor-default]="isLessonCompleted(currentLessonId)">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span>{{ isLessonCompleted(currentLessonId) ? 'Completed ✓' : 'Mark as Completed' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

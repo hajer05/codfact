@@ -1,0 +1,121 @@
+<div class="pfe-detail-container" *ngIf="!loading && subject">
+  <!-- Header -->
+  <div class="header-section">
+    <div class="container">
+      <div class="breadcrumb">
+        <a routerLink="/pfe" class="breadcrumb-link">
+          <i class="fas fa-arrow-left"></i> Back to PFE Subjects
+        </a>
+      </div>
+      
+      <div class="subject-header">
+        <h1 class="subject-title">{{ subject.title }}</h1>
+        <div class="subject-meta">
+          <div class="supervisor-info">
+            <span class="supervisor-label">Supervised by:</span>
+            <span class="supervisor-name">{{ subject.createdByName }}</span>
+            <span class="supervisor-role">{{ subject.createdByRole }}</span>
+          </div>
+          <div class="subject-stats">
+            <div class="stat">
+              <i class="fas fa-users"></i>
+              <span>{{ subject.applicationCount }} applications</span>
+            </div>
+            <div class="stat">
+              <i class="fas fa-calendar"></i>
+              <span>Posted {{ subject.createdAt | date:'MMM dd, yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content-section">
+    <div class="container">
+      <div class="content-grid">
+        <!-- Main Content -->
+        <div class="main-content">
+          <div class="content-card">
+            <h2>Project Description</h2>
+            <div class="description-content">
+              {{ subject.description }}
+            </div>
+          </div>
+
+          <div class="content-card">
+            <h2>Requirements & Skills</h2>
+            <div class="requirements-content">
+              {{ subject.requirements }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <!-- Alert if student has accepted application -->
+          <div class="alert alert-info" *ngIf="hasAccepted && acceptedApplication">
+            <i class="fas fa-info-circle"></i>
+            <div>
+              <strong>Already Accepted</strong>
+              <p>You are assigned to "{{ acceptedApplication.subjectTitle }}"</p>
+            </div>
+          </div>
+
+          <div class="apply-card">
+            <h3>Apply for this PFE</h3>
+            <p *ngIf="canApply()">Interested in this project? Submit your application now!</p>
+            <p *ngIf="!canApply()" class="text-muted">You cannot apply to multiple projects.</p>
+            
+            <div class="project-info">
+              <div class="info-item">
+                <span class="label">Status:</span>
+                <span class="value status-open">Open for Applications</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Applications:</span>
+                <span class="value">{{ subject.applicationCount }} received</span>
+              </div>
+            </div>
+
+            <div class="apply-actions">
+              <button 
+                [routerLink]="canApply() ? ['/pfe', subject.id, 'apply'] : null" 
+                [disabled]="!canApply()"
+                [title]="getApplyTooltip()"
+                class="btn btn-primary btn-large">
+                <i class="fas fa-paper-plane"></i>
+                {{ canApply() ? 'Apply Now' : 'Already Accepted' }}
+              </button>
+              <button 
+                routerLink="/pfe/my-applications" 
+                class="btn btn-outline">
+                <i class="fas fa-list"></i>
+                My Applications
+              </button>
+            </div>
+          </div>
+
+          <div class="supervisor-card">
+            <h3>Project Supervisor</h3>
+            <div class="supervisor-profile">
+              <div class="supervisor-avatar">
+                {{ subject.createdByName.charAt(0).toUpperCase() }}
+              </div>
+              <div class="supervisor-details">
+                <h4>{{ subject.createdByName }}</h4>
+                <p class="role">{{ subject.createdByRole }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading-container" *ngIf="loading">
+  <div class="loading-spinner"></div>
+  <p>Loading PFE subject details...</p>
+</div>

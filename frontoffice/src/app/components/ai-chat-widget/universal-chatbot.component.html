@@ -1,0 +1,104 @@
+<!-- Floating Chat Button -->
+<div class="fixed bottom-6 right-6 z-50">
+  <button
+    *ngIf="!isOpen"
+    (click)="openChat()"
+    class="bg-gradient-to-r from-red-600 to-gray-900 text-white rounded-full p-4 shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200 flex items-center space-x-2"
+    title="Ouvrir l'assistant IA">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+    </svg>
+    <span class="hidden md:inline font-medium">Assistant IA</span>
+  </button>
+
+  <!-- Chat Window -->
+  <div
+    *ngIf="isOpen"
+    class="bg-white rounded-lg shadow-2xl w-96 h-[600px] flex flex-col border border-gray-200"
+    style="max-width: calc(100vw - 3rem);">
+    
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-red-600 to-gray-900 text-white p-4 rounded-t-lg flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+        </svg>
+        <div>
+          <h3 class="font-semibold">Assistant CODING FACTORY</h3>
+          <p class="text-xs text-blue-100">Je peux tout vous expliquer !</p>
+        </div>
+      </div>
+      <button
+        (click)="closeChat()"
+        class="text-white hover:text-gray-200 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Messages Container -->
+    <div
+      #messagesContainer
+      class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+      
+      <div
+        *ngFor="let message of messages"
+        [class.flex-row-reverse]="message.isUser"
+        class="flex gap-2">
+        
+        <!-- Avatar -->
+        <div
+          [class.bg-blue-600]="!message.isUser"
+          [class.bg-gray-600]="message.isUser"
+          class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
+          <svg *ngIf="!message.isUser" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+          </svg>
+          <svg *ngIf="message.isUser" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+          </svg>
+        </div>
+
+        <!-- Message Content -->
+        <div
+          [class.bg-blue-600]="!message.isUser"
+          [class.text-white]="!message.isUser"
+          [class.bg-white]="message.isUser"
+          [class.text-gray-800]="message.isUser"
+          [class.border]="message.isUser"
+          [class.border-gray-200]="message.isUser"
+          class="rounded-lg px-4 py-2 max-w-[80%] shadow-sm">
+          <p class="text-sm whitespace-pre-wrap">{{ message.content }}</p>
+          <span class="text-xs opacity-70 mt-1 block">{{ message.timestamp | date:'HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="border-t border-gray-200 p-4 bg-white">
+      <form (ngSubmit)="sendMessage()" class="flex gap-2">
+        <input
+          [(ngModel)]="currentMessage"
+          (keypress)="onKeyPress($event)"
+          [disabled]="isLoading"
+          type="text"
+          placeholder="Posez votre question..."
+          class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          name="message">
+        <button
+          type="submit"
+          [disabled]="isLoading || !currentMessage.trim()"
+          class="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+          </svg>
+        </button>
+      </form>
+      <p class="text-xs text-gray-500 mt-2 text-center">
+        L'assistant connaît tous les aspects de CODING FACTORY
+      </p>
+    </div>
+  </div>
+</div>
+

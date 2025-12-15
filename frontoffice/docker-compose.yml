@@ -1,0 +1,19 @@
+services:
+  frontoffice:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: frontoffice-app
+    ports:
+      - "4201:4201"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - frontoffice-net
+
+networks:
+  frontoffice-net:
+    driver: bridge
+
+

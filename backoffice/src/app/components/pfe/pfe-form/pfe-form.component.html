@@ -1,0 +1,76 @@
+<div class="pfe-form-container">
+  <div class="header">
+    <h2>{{ isEditMode ? 'Edit PFE Subject' : 'Create New PFE Subject' }}</h2>
+    <button (click)="cancel()" class="btn btn-outline">
+      <i class="fas fa-arrow-left"></i> Back to PFE Subjects
+    </button>
+  </div>
+
+  <div class="form-card" *ngIf="!loading">
+    <form [formGroup]="pfeForm" (ngSubmit)="onSubmit()">
+      <!-- Title -->
+      <div class="form-group">
+        <label for="title">Title *</label>
+        <input 
+          type="text" 
+          id="title"
+          formControlName="title"
+          class="form-control"
+          [class.error]="title?.invalid && title?.touched"
+          placeholder="Enter PFE subject title">
+        <div class="error-message" *ngIf="title?.invalid && title?.touched">
+          <span *ngIf="title?.errors?.['required']">Title is required</span>
+          <span *ngIf="title?.errors?.['maxlength']">Title must be less than 500 characters</span>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="description">Description *</label>
+        <textarea 
+          id="description"
+          formControlName="description"
+          class="form-control description-textarea"
+          [class.error]="description?.invalid && description?.touched"
+          placeholder="Describe the PFE subject in detail..."
+          rows="8"></textarea>
+        <div class="error-message" *ngIf="description?.invalid && description?.touched">
+          <span *ngIf="description?.errors?.['required']">Description is required</span>
+        </div>
+      </div>
+
+      <!-- Requirements -->
+      <div class="form-group">
+        <label for="requirements">Requirements *</label>
+        <textarea 
+          id="requirements"
+          formControlName="requirements"
+          class="form-control requirements-textarea"
+          [class.error]="requirements?.invalid && requirements?.touched"
+          placeholder="List the technical requirements, skills needed, etc..."
+          rows="6"></textarea>
+        <div class="error-message" *ngIf="requirements?.invalid && requirements?.touched">
+          <span *ngIf="requirements?.errors?.['required']">Requirements are required</span>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" (click)="cancel()" class="btn btn-outline">Cancel</button>
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="submitting || pfeForm.invalid">
+          <i class="fas fa-spinner fa-spin" *ngIf="submitting"></i>
+          <i class="fas fa-save" *ngIf="!submitting"></i>
+          {{ submitting ? 'Saving...' : (isEditMode ? 'Update Subject' : 'Create Subject') }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading PFE subject...</p>
+  </div>
+</div>

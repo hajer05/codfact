@@ -1,0 +1,511 @@
+<div class="workflow-container">
+  <div class="header">
+    <h2>PFE Progress Tracker</h2>
+    <div class="subject-info" *ngIf="application">
+      <h3>{{ application.subjectTitle }}</h3>
+      <p>Consultant: {{ application.subjectCreatedBy }}</p>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading your PFE progress...</p>
+  </div>
+
+  <div class="workflow-content" *ngIf="!loading && application">
+    <!-- Application Details Section -->
+    <div class="application-details-section">
+      <h3>Application Details</h3>
+      
+      <div class="details-grid">
+        <!-- Motivation Letter -->
+        <div class="detail-card motivation-card">
+          <div class="card-header">
+            <i class="fas fa-file-alt"></i>
+            <h4>Motivation Letter</h4>
+          </div>
+          <div class="card-content">
+            <p class="motivation-text">{{ application.motivation }}</p>
+          </div>
+        </div>
+
+        <!-- CV Section -->
+        <div class="detail-card cv-card" *ngIf="application.cvFileName">
+          <div class="card-header">
+            <i class="fas fa-file-pdf"></i>
+            <h4>Curriculum Vitae</h4>
+          </div>
+          <div class="card-content">
+            <div class="cv-file-info">
+              <div class="file-icon">
+                <i class="fas fa-file-pdf fa-3x"></i>
+              </div>
+              <div class="file-details">
+                <p class="file-name">{{ application.cvOriginalFileName }}</p>
+                <button 
+                  (click)="downloadCV()" 
+                  class="btn btn-primary btn-sm">
+                  <i class="fas fa-download"></i> Download CV
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No CV Message -->
+        <div class="detail-card cv-card no-cv" *ngIf="!application.cvFileName">
+          <div class="card-header">
+            <i class="fas fa-file-pdf"></i>
+            <h4>Curriculum Vitae</h4>
+          </div>
+          <div class="card-content">
+            <p class="no-cv-message">
+              <i class="fas fa-info-circle"></i>
+              No CV was uploaded with this application
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Workflow Steps Progress -->
+    <div class="workflow-steps">
+      <h3>Progress Steps</h3>
+      <div class="steps-container">
+        <div 
+          class="step" 
+          *ngFor="let step of workflowSteps; let i = index"
+          [class.completed]="isStepCompleted(i)"
+          [class.current]="isCurrentStep(i)"
+          [class.pending]="!isStepCompleted(i) && !isCurrentStep(i)">
+          
+          <div class="step-icon">
+            <i [class]="getStatusIcon(i)"></i>
+          </div>
+          
+          <div class="step-content">
+            <h4>{{ step.label }}</h4>
+            <p>{{ step.description }}</p>
+            
+            <!-- Step-specific content -->
+            <div class="step-details" *ngIf="isCurrentStep(i)">
+              
+              <!-- Project Upload Step -->
+              <div *ngIf="step.key === 'PROJECT_UPLOAD'" class="upload-section">
+                <!-- Show uploaded projects -->
+                <div class="uploaded-files-info" *ngIf="getProjectDocuments().length > 0">
+                  <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Project Uploaded!</strong> Your project has been submitted and is waiting for review.
+                  </div>
+                  <div class="uploaded-file" *ngFor="let doc of getProjectDocuments()">
+                    <i class="fas fa-file-archive"></i>
+                    <span>{{ doc.originalFileName }}</span>
+                    <small>{{ formatFileSize(doc.fileSize) }} • {{ doc.uploadedAt | date:'short' }}</small>
+                  </div>
+                </div>
+                
+                <div class="alert alert-info" *ngIf="getProjectDocuments().length === 0">
+                  <i class="fas fa-info-circle"></i>
+                  <strong>Action Required:</strong> Upload your project as a RAR file (max 50MB)
+                </div>
+                
+                <div class="upload-form" *ngIf="canUploadFile() && getProjectDocuments().length === 0">
+                  <div class="form-group">
+                    <label for="projectFile">Select Project File (RAR)</label>
+                    <input 
+                      type="file" 
+                      id="fileInput"
+                      accept=".rar"
+                      (change)="onFileSelected($event)"
+                      class="form-control">
+                  </div>
+                  
+                  <div class="form-group" *ngIf="selectedFile">
+                    <label for="description">Description (Optional)</label>
+                    <textarea 
+                      id="description"
+                      [(ngModel)]="description"
+                      class="form-control"
+                      placeholder="Add a description for your project..."
+                      rows="3"></textarea>
+                  </div>
+                  
+                  <button 
+                    (click)="uploadFile()"
+                    [disabled]="!selectedFile || uploading"
+                    class="btn btn-primary">
+                    <i class="fas fa-upload"></i>
+                    <span *ngIf="!uploading">Upload Project</span>
+                    <span *ngIf="uploading">Uploading...</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Report Upload Step -->
+              <div *ngIf="step.key === 'REPORT_UPLOAD'" class="upload-section">
+                <!-- Show uploaded reports -->
+                <div class="uploaded-files-info" *ngIf="getReportDocuments().length > 0">
+                  <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Report Uploaded!</strong> Your report has been submitted and is waiting for review.
+                  </div>
+                  <div class="uploaded-file" *ngFor="let doc of getReportDocuments()">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>{{ doc.originalFileName }}</span>
+                    <small>{{ formatFileSize(doc.fileSize) }} • {{ doc.uploadedAt | date:'short' }}</small>
+                  </div>
+                </div>
+                
+                <div class="alert alert-info" *ngIf="getReportDocuments().length === 0">
+                  <i class="fas fa-info-circle"></i>
+                  <strong>Action Required:</strong> Upload your final report as PDF or DOCX file (max 10MB)
+                </div>
+                
+                <div class="upload-form" *ngIf="canUploadFile() && getReportDocuments().length === 0">
+                  <div class="form-group">
+                    <label for="reportFile">Select Report File (PDF/DOCX)</label>
+                    <input 
+                      type="file" 
+                      id="fileInput"
+                      accept=".pdf,.doc,.docx"
+                      (change)="onFileSelected($event)"
+                      class="form-control">
+                  </div>
+                  
+                  <div class="form-group" *ngIf="selectedFile">
+                    <label for="description">Description (Optional)</label>
+                    <textarea 
+                      id="description"
+                      [(ngModel)]="description"
+                      class="form-control"
+                      placeholder="Add a description for your report..."
+                      rows="3"></textarea>
+                  </div>
+                  
+                  <button 
+                    (click)="uploadFile()"
+                    [disabled]="!selectedFile || uploading"
+                    class="btn btn-primary">
+                    <i class="fas fa-upload"></i>
+                    <span *ngIf="!uploading">Upload Report</span>
+                    <span *ngIf="uploading">Uploading...</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Review Steps -->
+              <div *ngIf="step.key === 'PROJECT_REVIEW' || step.key === 'REPORT_REVIEW' || step.key === 'APPLICATION_REVIEW'" class="review-section">
+                
+                <!-- Admin Review Interface -->
+                <div *ngIf="canReview() && needsReview(step.key)" class="admin-review-panel">
+                  <div class="alert alert-info">
+                    <i class="fas fa-clipboard-check"></i>
+                    <strong>Review Required:</strong> Please review the submission below.
+                  </div>
+
+                  <!-- Show CV for all review stages -->
+                  <div class="review-materials" *ngIf="application.cvFileName">
+                    <h5><i class="fas fa-file-pdf"></i> Student CV</h5>
+                    <div class="document-preview">
+                      <div class="doc-info">
+                        <span class="doc-name">{{ application.cvOriginalFileName }}</span>
+                        <button (click)="downloadCV()" class="btn btn-sm btn-outline">
+                          <i class="fas fa-download"></i> Download CV
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Show uploaded documents for project/report review -->
+                  <div class="review-materials" *ngIf="step.key === 'PROJECT_REVIEW' && getProjectDocuments().length > 0">
+                    <h5><i class="fas fa-file-archive"></i> Submitted Project</h5>
+                    <div class="document-preview" *ngFor="let doc of getProjectDocuments()">
+                      <div class="doc-info">
+                        <span class="doc-name">{{ doc.originalFileName }}</span>
+                        <span class="doc-size">{{ formatFileSize(doc.fileSize) }}</span>
+                        <button (click)="downloadDocument(doc)" class="btn btn-sm btn-outline">
+                          <i class="fas fa-download"></i> Download
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="review-materials" *ngIf="step.key === 'REPORT_REVIEW' && getReportDocuments().length > 0">
+                    <h5><i class="fas fa-file-pdf"></i> Submitted Report</h5>
+                    <div class="document-preview" *ngFor="let doc of getReportDocuments()">
+                      <div class="doc-info">
+                        <span class="doc-name">{{ doc.originalFileName }}</span>
+                        <span class="doc-size">{{ formatFileSize(doc.fileSize) }}</span>
+                        <button (click)="downloadDocument(doc)" class="btn btn-sm btn-outline">
+                          <i class="fas fa-download"></i> Download
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Review Action Buttons -->
+                  <div class="review-actions">
+                    <button 
+                      (click)="openReviewModal(step.key === 'APPLICATION_REVIEW' ? 'application' : step.key === 'PROJECT_REVIEW' ? 'project' : 'report')" 
+                      class="btn btn-primary">
+                      <i class="fas fa-clipboard-check"></i> Review Now
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Show review comment if exists -->
+                <div *ngIf="step.key === 'PROJECT_REVIEW' && application.projectReviewComment" class="review-result">
+                  <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Review Completed!</strong>
+                  </div>
+                  <div class="review-comment-box">
+                    <h5>Consultant's Feedback:</h5>
+                    <p>{{ application.projectReviewComment }}</p>
+                    <small>Reviewed on {{ application.projectReviewedAt | date:'medium' }}</small>
+                  </div>
+                </div>
+                
+                <div *ngIf="step.key === 'REPORT_REVIEW' && application.reportReviewComment" class="review-result">
+                  <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Review Completed!</strong>
+                  </div>
+                  <div class="review-comment-box">
+                    <h5>Consultant's Feedback:</h5>
+                    <p>{{ application.reportReviewComment }}</p>
+                    <small>Reviewed on {{ application.reportReviewedAt | date:'medium' }}</small>
+                  </div>
+                </div>
+                
+                <div *ngIf="step.key === 'APPLICATION_REVIEW' && application.reviewComment" class="review-result">
+                  <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Application Accepted!</strong>
+                  </div>
+                  <div class="review-comment-box">
+                    <h5>Consultant's Message:</h5>
+                    <p>{{ application.reviewComment }}</p>
+                    <small>Reviewed on {{ application.reviewedAt | date:'medium' }}</small>
+                  </div>
+                </div>
+                
+                <!-- Waiting message if no review yet (for students) -->
+                <div *ngIf="!canReview() && ((step.key === 'PROJECT_REVIEW' && !application.projectReviewComment) || 
+                            (step.key === 'REPORT_REVIEW' && !application.reportReviewComment) ||
+                            (step.key === 'APPLICATION_REVIEW' && !application.reviewComment))" 
+                     class="alert alert-warning">
+                  <i class="fas fa-clock"></i>
+                  <strong>Waiting for Review:</strong> Your consultant is reviewing your submission. You will be notified once the review is complete.
+                </div>
+              </div>
+
+              <!-- Jury Scheduling -->
+              <div *ngIf="step.key === 'JURY_SCHEDULING'" class="scheduling-section">
+                <!-- Admin Jury Scheduling Interface -->
+                <div *ngIf="canReview() && needsReview(step.key)" class="admin-review-panel">
+                  <div class="alert alert-info">
+                    <i class="fas fa-calendar-alt"></i>
+                    <strong>Schedule Jury:</strong> Please schedule the jury presentation.
+                  </div>
+                  
+                  <div class="review-actions">
+                    <button (click)="openReviewModal('jury')" class="btn btn-primary">
+                      <i class="fas fa-calendar-plus"></i> Schedule Jury
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Student waiting message -->
+                <div *ngIf="!canReview() && !application.juryDate" class="alert alert-info">
+                  <i class="fas fa-calendar"></i>
+                  <strong>Almost Done:</strong> Your consultant is scheduling your jury presentation. You will receive the date and location soon.
+                </div>
+              </div>
+
+              <!-- Completed -->
+              <div *ngIf="step.key === 'COMPLETED'" class="completion-section">
+                <div class="alert alert-success">
+                  <i class="fas fa-trophy"></i>
+                  <strong>Congratulations!</strong> Your PFE journey is complete!
+                </div>
+                
+                <div class="jury-info" *ngIf="application.juryDate">
+                  <h4>🎉 Jury Presentation Details</h4>
+                  <div class="jury-details">
+                    <p><strong>Date & Time:</strong> {{ getJuryDateFormatted() }}</p>
+                    <p *ngIf="application.juryLocation"><strong>Location:</strong> {{ application.juryLocation }}</p>
+                  </div>
+                  <div class="congratulations">
+                    <p>🎓 Your hard work has paid off! Best of luck with your presentation!</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Step connector line -->
+          <div class="step-connector" *ngIf="i < workflowSteps.length - 1"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documents Section -->
+    <div class="documents-section" *ngIf="documents.length > 0">
+      <h3>Uploaded Documents</h3>
+      <div class="documents-list">
+        <div class="document-item" *ngFor="let document of documents">
+          <div class="document-info">
+            <div class="document-icon">
+              <i class="fas fa-file" [class.fa-file-archive]="document.documentType === 'PROJECT'" 
+                 [class.fa-file-pdf]="document.documentType === 'REPORT'"></i>
+            </div>
+            <div class="document-details">
+              <h4>{{ document.originalFileName }}</h4>
+              <p>{{ document.documentType }} • {{ formatFileSize(document.fileSize) }}</p>
+              <small>Uploaded: {{ document.uploadedAt | date:'short' }}</small>
+            </div>
+          </div>
+          <div class="document-actions">
+            <button (click)="downloadDocument(document)" class="btn btn-outline">
+              <i class="fas fa-download"></i> Download
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Review Comments Section -->
+    <div class="reviews-section" *ngIf="application.projectReviewComment || application.reportReviewComment">
+      <h3>Review Comments</h3>
+      
+      <div class="review-item" *ngIf="application.projectReviewComment">
+        <h4>Project Review</h4>
+        <div class="review-content">
+          <p>{{ application.projectReviewComment }}</p>
+          <small>Reviewed: {{ application.projectReviewedAt | date:'short' }}</small>
+        </div>
+      </div>
+      
+      <div class="review-item" *ngIf="application.reportReviewComment">
+        <h4>Report Review</h4>
+        <div class="review-content">
+          <p>{{ application.reportReviewComment }}</p>
+          <small>Reviewed: {{ application.reportReviewedAt | date:'short' }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="!loading && !application">
+    <div class="alert alert-danger">
+      <i class="fas fa-exclamation-triangle"></i>
+      <h3>Application Not Found</h3>
+      <p>We couldn't find your PFE application. Please check the URL or contact support.</p>
+      <a routerLink="/pfe/my-applications" class="btn btn-primary">
+        <i class="fas fa-arrow-left"></i> Back to My Applications
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Review Modal -->
+<div class="modal-overlay" *ngIf="showReviewModal" (click)="closeReviewModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>
+        <i class="fas fa-clipboard-check"></i>
+        {{ reviewType === 'application' ? 'Review Application' : 
+           reviewType === 'project' ? 'Review Project' : 
+           reviewType === 'report' ? 'Review Report' : 
+           'Schedule Jury' }}
+      </h3>
+      <button class="close-btn" (click)="closeReviewModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Application/Project/Report Review Form -->
+      <div *ngIf="reviewType !== 'jury'">
+        <div class="form-group">
+          <label for="reviewComment">Review Comments</label>
+          <textarea 
+            id="reviewComment"
+            [(ngModel)]="reviewComment"
+            class="form-control"
+            rows="5"
+            placeholder="Add your review comments..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button 
+            (click)="submitReview(true)" 
+            [disabled]="submittingReview"
+            class="btn btn-success">
+            <i class="fas fa-check"></i>
+            <span *ngIf="!submittingReview">Approve</span>
+            <span *ngIf="submittingReview">Processing...</span>
+          </button>
+          <button 
+            (click)="submitReview(false)" 
+            [disabled]="submittingReview"
+            class="btn btn-danger">
+            <i class="fas fa-times"></i>
+            <span *ngIf="!submittingReview">Reject</span>
+            <span *ngIf="submittingReview">Processing...</span>
+          </button>
+          <button 
+            (click)="closeReviewModal()" 
+            [disabled]="submittingReview"
+            class="btn btn-secondary">
+            Cancel
+          </button>
+        </div>
+      </div>
+
+      <!-- Jury Scheduling Form -->
+      <div *ngIf="reviewType === 'jury'">
+        <div class="form-group">
+          <label for="juryDate">Jury Date & Time</label>
+          <input 
+            type="datetime-local"
+            id="juryDate"
+            [(ngModel)]="juryDate"
+            class="form-control"
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="juryLocation">Location</label>
+          <input 
+            type="text"
+            id="juryLocation"
+            [(ngModel)]="juryLocation"
+            class="form-control"
+            placeholder="e.g., Room 301, Building A"
+            required>
+        </div>
+
+        <div class="modal-actions">
+          <button 
+            (click)="submitReview(true)" 
+            [disabled]="submittingReview || !juryDate || !juryLocation"
+            class="btn btn-primary">
+            <i class="fas fa-calendar-check"></i>
+            <span *ngIf="!submittingReview">Schedule Jury</span>
+            <span *ngIf="submittingReview">Scheduling...</span>
+          </button>
+          <button 
+            (click)="closeReviewModal()" 
+            [disabled]="submittingReview"
+            class="btn btn-secondary">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

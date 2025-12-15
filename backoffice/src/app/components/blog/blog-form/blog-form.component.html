@@ -1,0 +1,105 @@
+<div class="blog-form-container">
+  <div class="header">
+    <h2>{{ isEditMode ? 'Edit Blog' : 'Create New Blog' }}</h2>
+    <button (click)="cancel()" class="btn btn-outline">
+      <i class="fas fa-arrow-left"></i> Back to Blogs
+    </button>
+  </div>
+
+  <div class="form-card" *ngIf="!loading">
+    <form [formGroup]="blogForm" (ngSubmit)="onSubmit()">
+      <!-- Title -->
+      <div class="form-group">
+        <label for="title">Title *</label>
+        <input 
+          type="text" 
+          id="title"
+          formControlName="title"
+          class="form-control"
+          [class.error]="title?.invalid && title?.touched"
+          placeholder="Enter blog title">
+        <div class="error-message" *ngIf="title?.invalid && title?.touched">
+          <span *ngIf="title?.errors?.['required']">Title is required</span>
+          <span *ngIf="title?.errors?.['maxlength']">Title must be less than 500 characters</span>
+        </div>
+      </div>
+
+      <!-- Photo URL -->
+      <div class="form-group">
+        <label for="photo">Featured Image URL</label>
+        <input 
+          type="url" 
+          id="photo"
+          formControlName="photo"
+          class="form-control"
+          placeholder="https://example.com/image.jpg">
+        <small class="form-text">Optional: Add a URL for the featured image</small>
+      </div>
+
+      <!-- Photo Preview -->
+      <div class="image-preview" *ngIf="photo?.value && isValidImageUrl">
+        <img [src]="photo?.value" [alt]="title?.value" (error)="onImageError()">
+      </div>
+      <div class="image-error" *ngIf="photo?.value && !isValidImageUrl">
+        <p class="text-red-500 text-sm">⚠️ Unable to load image from this URL. Please check the URL.</p>
+      </div>
+
+      <!-- Tags -->
+      <div class="form-group">
+        <label>Tags</label>
+        <div class="tag-input-container">
+          <input 
+            type="text" 
+            [(ngModel)]="tagInput"
+            (keypress)="onTagInputKeyPress($event)"
+            class="form-control"
+            placeholder="Add a tag and press Enter"
+            [ngModelOptions]="{standalone: true}">
+          <button type="button" (click)="addTag()" class="btn btn-secondary">Add Tag</button>
+        </div>
+        
+        <div class="tags-display" *ngIf="tags.length > 0">
+          <span class="tag" *ngFor="let tag of tags; let i = index">
+            {{ tag }}
+            <button type="button" (click)="removeTag(i)" class="tag-remove">
+              <i class="fas fa-times"></i>
+            </button>
+          </span>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="form-group">
+        <label for="content">Content *</label>
+        <textarea 
+          id="content"
+          formControlName="content"
+          class="form-control content-textarea"
+          [class.error]="content?.invalid && content?.touched"
+          placeholder="Write your blog content here..."
+          rows="15"></textarea>
+        <div class="error-message" *ngIf="content?.invalid && content?.touched">
+          <span *ngIf="content?.errors?.['required']">Content is required</span>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" (click)="cancel()" class="btn btn-outline">Cancel</button>
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="submitting || blogForm.invalid">
+          <i class="fas fa-spinner fa-spin" *ngIf="submitting"></i>
+          <i class="fas fa-save" *ngIf="!submitting"></i>
+          {{ submitting ? 'Saving...' : (isEditMode ? 'Update Blog' : 'Create Blog') }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading blog...</p>
+  </div>
+</div>

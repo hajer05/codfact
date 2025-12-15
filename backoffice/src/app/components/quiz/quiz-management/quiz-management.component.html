@@ -1,0 +1,285 @@
+<div class="quiz-management-container">
+  <div class="header">
+    <h1>Gestion des Quiz</h1>
+    <p>Générez et gérez les quiz pour vos cours avec l'IA</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading && courses.length === 0" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Chargement...</p>
+  </div>
+
+  <!-- Course Selection -->
+  <div *ngIf="!loading || courses.length > 0" class="courses-section">
+    <h2>Sélectionnez un cours</h2>
+    <div class="courses-grid">
+      <div 
+        *ngFor="let course of courses" 
+        class="course-card"
+        [class.selected]="course.id === selectedCourseId"
+        (click)="selectCourse(course.id)"
+      >
+        <div class="course-image">
+          <img 
+            *ngIf="course.thumbnailImage" 
+            [src]="'http://localhost:8090/uploads/' + course.thumbnailImage"
+            [alt]="course.title"
+          />
+          <div *ngIf="!course.thumbnailImage" class="course-placeholder">
+            <i class="fas fa-book"></i>
+          </div>
+        </div>
+        <div class="course-info">
+          <h3>{{ course.title }}</h3>
+          <p>{{ course.category }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quizzes Section -->
+  <div *ngIf="selectedCourseId" class="quizzes-section">
+    <div class="section-header">
+      <h2>Quiz du cours</h2>
+      <button class="btn btn-primary" (click)="openGenerateForm(selectedCourseId)">
+        <i class="fas fa-robot"></i>
+        Générer un Quiz avec l'IA
+      </button>
+    </div>
+
+    <!-- Loading Quizzes -->
+    <div *ngIf="loading" class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Chargement des quiz...</p>
+    </div>
+
+    <!-- No Quizzes -->
+    <div *ngIf="!loading && quizzes.length === 0" class="empty-state">
+      <i class="fas fa-clipboard-question"></i>
+      <h3>Aucun quiz pour ce cours</h3>
+      <p>Générez un quiz avec l'IA pour commencer</p>
+    </div>
+
+    <!-- Quizzes List -->
+    <div *ngIf="!loading && quizzes.length > 0" class="quizzes-list">
+      <div *ngFor="let quiz of quizzes" class="quiz-card">
+        <div class="quiz-header">
+          <div>
+            <h3>{{ quiz.title }}</h3>
+            <p>{{ quiz.description }}</p>
+          </div>
+          <span class="badge" [class]="getStatusBadgeClass(quiz.status)">
+            {{ getStatusLabel(quiz.status) }}
+          </span>
+        </div>
+
+        <div class="quiz-stats">
+          <div class="stat">
+            <i class="fas fa-question-circle"></i>
+            <span>{{ quiz.totalQuestions }} questions</span>
+          </div>
+          <div class="stat">
+            <i class="fas fa-clock"></i>
+            <span>{{ quiz.durationMinutes }} min</span>
+          </div>
+          <div class="stat">
+            <i class="fas fa-star"></i>
+            <span>Score min: {{ quiz.passingScore }}%</span>
+          </div>
+          <div class="stat">
+            <i class="fas fa-robot"></i>
+            <span>{{ quiz.generatedByAI ? 'Généré par IA' : 'Manuel' }}</span>
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="btn btn-secondary" (click)="viewQuiz(quiz)">
+            <i class="fas fa-eye"></i>
+            Voir les détails
+          </button>
+          
+          <button 
+            *ngIf="quiz.status === 'PENDING_APPROVAL'" 
+            class="btn btn-success" 
+            (click)="approveQuiz(quiz.id)"
+          >
+            <i class="fas fa-check"></i>
+            Approuver
+          </button>
+          
+          <button 
+            *ngIf="quiz.status === 'PENDING_APPROVAL'" 
+            class="btn btn-danger" 
+            (click)="rejectQuiz(quiz.id)"
+          >
+            <i class="fas fa-times"></i>
+            Rejeter
+          </button>
+
+          <button 
+            *ngIf="quiz.status === 'APPROVED'"
+            class="btn btn-info" 
+            (click)="viewResults(quiz.id)"
+          >
+            <i class="fas fa-chart-bar"></i>
+            Voir les résultats
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Generate Quiz Modal -->
+<div *ngIf="showGenerateForm" class="modal-overlay" (click)="closeGenerateForm()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Générer un Quiz avec l'IA</h2>
+      <button class="close-btn" (click)="closeGenerateForm()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <form (ngSubmit)="generateQuiz()">
+        <div class="form-group">
+          <label>Nombre de questions</label>
+          <input 
+            type="number" 
+            [(ngModel)]="generateRequest.numberOfQuestions"
+            name="numberOfQuestions"
+            min="1"
+            max="50"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Difficulté</label>
+          <select [(ngModel)]="generateRequest.difficulty" name="difficulty" required>
+            <option value="EASY">Facile</option>
+            <option value="MEDIUM">Moyen</option>
+            <option value="HARD">Difficile</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Sujets à privilégier (optionnel)</label>
+          <textarea 
+            [(ngModel)]="generateRequest.focusTopics"
+            name="focusTopics"
+            rows="3"
+            placeholder="Ex: POO, héritage, polymorphisme..."
+          ></textarea>
+          <small>Laissez vide pour couvrir tous les sujets du cours</small>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeGenerateForm()">
+            Annuler
+          </button>
+          <button 
+            type="submit" 
+            class="btn btn-primary" 
+            [disabled]="generating"
+          >
+            <i *ngIf="!generating" class="fas fa-robot"></i>
+            <i *ngIf="generating" class="fas fa-spinner fa-spin"></i>
+            {{ generating ? 'Génération en cours...' : 'Générer le Quiz' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Details Modal -->
+<div *ngIf="showQuizDetails && selectedQuiz" class="modal-overlay" (click)="closeQuizDetails()">
+  <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2>{{ selectedQuiz.title }}</h2>
+        <span class="badge" [class]="getStatusBadgeClass(selectedQuiz.status)">
+          {{ getStatusLabel(selectedQuiz.status) }}
+        </span>
+      </div>
+      <button class="close-btn" (click)="closeQuizDetails()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="quiz-info-section">
+        <p><strong>Description:</strong> {{ selectedQuiz.description }}</p>
+        <div class="quiz-meta">
+          <span><strong>Questions:</strong> {{ selectedQuiz.totalQuestions }}</span>
+          <span><strong>Durée:</strong> {{ selectedQuiz.durationMinutes }} minutes</span>
+          <span><strong>Score minimum:</strong> {{ selectedQuiz.passingScore }}%</span>
+          <span><strong>Points totaux:</strong> {{ selectedQuiz.totalPoints }}</span>
+        </div>
+      </div>
+
+      <h3>Questions</h3>
+      <div class="questions-list">
+        <div *ngFor="let question of selectedQuiz.questions; let i = index" class="question-item">
+          <div class="question-header">
+            <span class="question-number">Question {{ i + 1 }}</span>
+            <span class="question-points">{{ question.points }} point(s)</span>
+            <span class="question-type">{{ question.type }}</span>
+          </div>
+
+          <p class="question-text">{{ question.question }}</p>
+
+          <div *ngIf="question.options && question.options.length > 0" class="options-list">
+            <div 
+              *ngFor="let option of question.options" 
+              class="option-item"
+              [class.correct]="option === question.correctAnswer"
+            >
+              <span>{{ option }}</span>
+              <i *ngIf="option === question.correctAnswer" class="fas fa-check-circle"></i>
+            </div>
+          </div>
+
+          <div *ngIf="question.type === 'SHORT_ANSWER'" class="correct-answer">
+            <strong>Réponse correcte:</strong> {{ question.correctAnswer }}
+          </div>
+
+          <div *ngIf="question.explanation" class="explanation">
+            <i class="fas fa-info-circle"></i>
+            <span>{{ question.explanation }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeQuizDetails()">
+        Fermer
+      </button>
+      <button 
+        *ngIf="selectedQuiz.status === 'PENDING_APPROVAL'" 
+        class="btn btn-success" 
+        (click)="approveQuiz(selectedQuiz.id)"
+      >
+        <i class="fas fa-check"></i>
+        Approuver
+      </button>
+      <button 
+        *ngIf="selectedQuiz.status === 'PENDING_APPROVAL'" 
+        class="btn btn-danger" 
+        (click)="rejectQuiz(selectedQuiz.id)"
+      >
+        <i class="fas fa-times"></i>
+        Rejeter
+      </button>
+    </div>
+  </div>
+</div>
+

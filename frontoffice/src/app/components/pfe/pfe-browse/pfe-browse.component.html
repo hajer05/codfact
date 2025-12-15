@@ -1,0 +1,117 @@
+<div class="pfe-browse-container">
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <div class="hero-content">
+      <h1>PFE Subjects</h1>
+      <p>Discover and apply to exciting final year project opportunities</p>
+      <div class="search-section">
+        <div class="search-box">
+          <input 
+            type="text" 
+            [(ngModel)]="searchTerm" 
+            (keyup.enter)="searchSubjects()"
+            placeholder="Search PFE subjects by title, description..." 
+            class="search-input">
+          <button (click)="searchSubjects()" class="search-btn">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subjects Section -->
+  <div class="subjects-section">
+    <div class="container">
+      <!-- Alert if student has accepted application -->
+      <div class="alert alert-info" *ngIf="hasAccepted && acceptedApplication">
+        <i class="fas fa-info-circle"></i>
+        <div>
+          <strong>You have been accepted for a PFE project!</strong>
+          <p>You are currently assigned to "{{ acceptedApplication.subjectTitle }}". You cannot apply to other projects.</p>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <h2>Available PFE Subjects</h2>
+        <p>Choose from {{ subjects.length }} available projects</p>
+      </div>
+
+      <div class="subjects-grid" *ngIf="!loading">
+        <div class="subject-card" *ngFor="let subject of filteredSubjects">
+          <div class="card-header">
+            <h3 class="subject-title">{{ subject.title }}</h3>
+            <div class="subject-meta">
+              <span class="supervisor">Supervisor: {{ subject.createdByName }}</span>
+              <span class="role-badge">{{ subject.createdByRole }}</span>
+            </div>
+          </div>
+
+          <div class="card-content">
+            <p class="subject-description">{{ subject.description | slice:0:200 }}...</p>
+            
+            <div class="requirements-preview" *ngIf="subject.requirements">
+              <h4>Key Requirements:</h4>
+              <p class="requirements-text">{{ subject.requirements | slice:0:150 }}...</p>
+            </div>
+
+            <div class="subject-stats">
+              <div class="stat">
+                <i class="fas fa-users"></i>
+                <span>{{ subject.applicationCount }} applications</span>
+              </div>
+              <div class="stat">
+                <i class="fas fa-calendar"></i>
+                <span>Posted {{ subject.createdAt | date:'MMM dd' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button 
+              [routerLink]="['/pfe', subject.id]" 
+              class="btn btn-outline">
+              <i class="fas fa-eye"></i> View Details
+            </button>
+            <button 
+              [routerLink]="canApply() ? ['/pfe', subject.id, 'apply'] : null" 
+              [disabled]="!canApply()"
+              [title]="getApplyTooltip()"
+              [class.btn-disabled]="!canApply()"
+              class="btn btn-primary">
+              <i class="fas fa-paper-plane"></i> 
+              {{ canApply() ? 'Apply Now' : 'Already Accepted' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-section" *ngIf="loading">
+        <div class="loading-spinner"></div>
+        <p>Loading PFE subjects...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state-enhanced" *ngIf="!loading && subjects.length === 0">
+        <div class="empty-state-content-box">
+          <div class="empty-icon-circle">
+            <i class="fas fa-graduation-cap"></i>
+          </div>
+          <h3 class="empty-title">{{ searchTerm ? 'No Subjects Found' : 'No PFE Subjects Available' }}</h3>
+          <p class="empty-description" *ngIf="searchTerm">
+            We couldn't find any PFE subjects matching your search.<br>
+            Try adjusting your search terms or view all subjects.
+          </p>
+          <p class="empty-description" *ngIf="!searchTerm">
+            There are no PFE subjects available at the moment.<br>
+            Check back later for new project opportunities.
+          </p>
+          <button (click)="loadOpenSubjects()" class="btn-enhanced" *ngIf="searchTerm">
+            <i class="fas fa-sync-alt"></i> View All Subjects
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

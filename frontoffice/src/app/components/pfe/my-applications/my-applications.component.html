@@ -1,0 +1,142 @@
+<div class="my-applications-container">
+  <!-- Header -->
+  <div class="header-section">
+    <div class="container">
+      <div class="breadcrumb">
+        <a routerLink="/pfe" class="breadcrumb-link">
+          <i class="fas fa-arrow-left"></i> Back to PFE Subjects
+        </a>
+      </div>
+      
+      <div class="page-header">
+        <h1>My Applications</h1>
+        <p>Track the status of your PFE project applications</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Applications List -->
+  <div class="applications-section">
+    <div class="container">
+      <div class="applications-list" *ngIf="!loading">
+        <div class="application-card" *ngFor="let application of applications">
+          <div class="card-header">
+            <div class="project-info">
+              <h3 class="project-title">{{ application.subjectTitle }}</h3>
+              <div class="supervisor-info">
+                <span class="supervisor">Supervised by {{ application.subjectCreatedBy }}</span>
+              </div>
+            </div>
+            <div class="application-actions">
+              <span class="status-badge" [class]="'status-' + application.status.toLowerCase()">
+                {{ application.status }}
+              </span>
+              <a 
+                *ngIf="application.status === 'ACCEPTED'" 
+                [routerLink]="['/pfe/workflow', application.id]" 
+                class="btn btn-primary btn-sm">
+                <i class="fas fa-tasks"></i> View Progress
+              </a>
+            </div>
+            <div class="status-info">
+              <span class="applied-date">Applied {{ application.appliedAt | date:'MMM dd, yyyy' }}</span>
+            </div>
+          </div>
+
+          <div class="card-content">
+            <div class="motivation-section">
+              <h4>Your Motivation</h4>
+              <p class="motivation-text">{{ application.motivation }}</p>
+            </div>
+
+            <div class="cv-section" *ngIf="application.cvFileName">
+              <h4>Attached CV</h4>
+              <div class="cv-file">
+                <i class="fas fa-file-pdf"></i>
+                <span class="cv-filename">{{ application.cvOriginalFileName }}</span>
+                <button 
+                  class="btn btn-sm btn-download" 
+                  (click)="downloadCV(application.id, application.cvOriginalFileName || 'cv.pdf')">
+                  <i class="fas fa-download"></i> Download
+                </button>
+              </div>
+            </div>
+
+            <div class="review-section" *ngIf="application.status !== 'PENDING' && application.reviewComment">
+              <h4>Supervisor Feedback</h4>
+              <div class="review-content">
+                <p class="review-comment">{{ application.reviewComment }}</p>
+                <div class="review-meta">
+                  <span class="reviewed-by">{{ application.reviewedByName }}</span>
+                  <span class="reviewed-date">{{ application.reviewedAt | date:'MMM dd, yyyy' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pending-message" *ngIf="application.status === 'PENDING'">
+              <div class="pending-content">
+                <i class="fas fa-hourglass-half"></i>
+                <div class="pending-text">
+                  <h4>Under Review</h4>
+                  <p>Your application is being reviewed by the supervisor. You'll be notified once a decision is made.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="accepted-message" *ngIf="application.status === 'ACCEPTED'">
+              <div class="accepted-content">
+                <i class="fas fa-check-circle"></i>
+                <div class="accepted-text">
+                  <h4>Congratulations!</h4>
+                  <p>Your application has been accepted. You can now start working on this PFE project.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="rejected-message" *ngIf="application.status === 'REJECTED'">
+              <div class="rejected-content">
+                <i class="fas fa-info-circle"></i>
+                <div class="rejected-text">
+                  <h4>Application Not Selected</h4>
+                  <p>Unfortunately, your application was not selected for this project. Don't give up - there are many other opportunities!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button 
+              [routerLink]="['/pfe', application.subjectId]" 
+              class="btn btn-outline">
+              <i class="fas fa-eye"></i> View Project
+            </button>
+            <button 
+              routerLink="/pfe" 
+              class="btn btn-primary" 
+              *ngIf="application.status === 'REJECTED'">
+              <i class="fas fa-search"></i> Find Other Projects
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-section" *ngIf="loading">
+        <div class="loading-spinner"></div>
+        <p>Loading your applications...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!loading && applications.length === 0">
+        <div class="empty-icon">
+          <i class="fas fa-clipboard-list fa-4x"></i>
+        </div>
+        <h3>No Applications Yet</h3>
+        <p>You haven't applied to any PFE projects yet. Browse available projects and submit your first application!</p>
+        <button routerLink="/pfe" class="btn btn-primary">
+          <i class="fas fa-search"></i> Browse PFE Projects
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

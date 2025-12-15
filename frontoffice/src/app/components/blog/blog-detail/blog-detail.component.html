@@ -1,0 +1,242 @@
+<div class="blog-detail-container" *ngIf="!loading">
+  <!-- Hero Section -->
+  <div class="hero-section" *ngIf="blog">
+    <div class="hero-overlay"></div>
+    <div class="hero-image" *ngIf="blog.photo">
+      <img [src]="blog.photo" [alt]="blog.title">
+    </div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="breadcrumb">
+          <a routerLink="/blogs" class="breadcrumb-link">
+            <i class="fas fa-arrow-left"></i> Back to Blogs
+          </a>
+        </div>
+        
+        <div class="blog-tags" *ngIf="blog.tags.length > 0">
+          <span class="tag" *ngFor="let tag of blog.tags">{{ tag }}</span>
+        </div>
+        
+        <h1 class="blog-title">{{ blog.title }}</h1>
+        
+        <div class="blog-meta">
+          <div class="author-info">
+            <div class="author-avatar">
+              {{ blog.authorName.charAt(0).toUpperCase() }}
+            </div>
+            <div class="author-details">
+              <span class="author-name">{{ blog.authorName }}</span>
+              <span class="author-role">{{ blog.authorRole }}</span>
+            </div>
+          </div>
+          
+          <div class="blog-stats">
+            <span class="date">
+              <i class="fas fa-calendar"></i>
+              {{ blog.createdAt | date:'MMM dd, yyyy' }}
+            </span>
+            <span class="read-time">
+              <i class="fas fa-clock"></i>
+              5 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Article Content -->
+  <div class="article-section" *ngIf="blog">
+    <div class="container">
+      <div class="article-wrapper">
+        <!-- Social Sidebar -->
+        <div class="social-sidebar">
+          <div class="social-actions">
+            <button 
+              (click)="likeBlog()" 
+              class="social-btn like-btn"
+              [class.liked]="false">
+              <i class="fas fa-heart"></i>
+              <span>{{ blog.likes }}</span>
+            </button>
+            
+            <button (click)="shareOnSocial('twitter')" class="social-btn">
+              <i class="fab fa-twitter"></i>
+            </button>
+            
+            <button (click)="shareOnSocial('facebook')" class="social-btn">
+              <i class="fab fa-facebook"></i>
+            </button>
+            
+            <button (click)="shareOnSocial('linkedin')" class="social-btn">
+              <i class="fab fa-linkedin"></i>
+            </button>
+            
+            <button (click)="copyLink()" class="social-btn">
+              <i class="fas fa-link"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Article Content -->
+        <article class="article-content">
+          <div class="content-body">
+            <div class="content-text">{{ blog.content }}</div>
+          </div>
+          
+          <!-- Article Footer -->
+          <div class="article-footer">
+            <div class="engagement-stats">
+              <div class="stat">
+                <i class="fas fa-heart"></i>
+                <span>{{ blog.likes }} likes</span>
+              </div>
+              <div class="stat">
+                <i class="fas fa-comment"></i>
+                <span>{{ blog.commentCount }} comments</span>
+              </div>
+            </div>
+            
+            <div class="share-buttons">
+              <span class="share-label">Share this article:</span>
+              <button (click)="shareOnSocial('twitter')" class="share-btn twitter">
+                <i class="fab fa-twitter"></i>
+              </button>
+              <button (click)="shareOnSocial('facebook')" class="share-btn facebook">
+                <i class="fab fa-facebook"></i>
+              </button>
+              <button (click)="shareOnSocial('linkedin')" class="share-btn linkedin">
+                <i class="fab fa-linkedin"></i>
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comments Section -->
+  <div class="comments-section" *ngIf="blog">
+    <div class="container">
+      <div class="comments-wrapper">
+        <div class="comments-header">
+          <h3>Discussion ({{ blog.commentCount }})</h3>
+          <p>Join the conversation and share your thoughts</p>
+        </div>
+
+        <!-- Add Comment Form -->
+        <div class="add-comment-form">
+          <div class="comment-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="comment-form">
+            <textarea 
+              [(ngModel)]="newComment"
+              placeholder="Share your thoughts on this article..."
+              class="comment-input"
+              rows="4"></textarea>
+            <div class="comment-actions">
+              <button 
+                (click)="addComment()" 
+                class="btn btn-primary"
+                [disabled]="!newComment.trim()">
+                <i class="fas fa-paper-plane"></i>
+                Post Comment
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comments List -->
+        <div class="comments-list" *ngIf="!commentsLoading">
+          <div class="comment-thread" *ngFor="let comment of comments">
+            <div class="comment">
+              <div class="comment-avatar">
+                {{ comment.authorName.charAt(0).toUpperCase() }}
+              </div>
+              <div class="comment-content">
+                <div class="comment-header">
+                  <span class="comment-author">{{ comment.authorName }}</span>
+                  <span class="comment-role">{{ comment.authorRole }}</span>
+                  <span class="comment-date">{{ comment.createdAt | date:'MMM dd, yyyy' }}</span>
+                </div>
+                <div class="comment-text">{{ comment.content }}</div>
+                <div class="comment-actions">
+                  <button 
+                    (click)="toggleReplyForm(comment.id)" 
+                    class="reply-btn">
+                    <i class="fas fa-reply"></i>
+                    Reply
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Replies -->
+            <div class="replies" *ngIf="comment.replies.length > 0">
+              <div class="reply" *ngFor="let reply of comment.replies">
+                <div class="reply-avatar">
+                  {{ reply.authorName.charAt(0).toUpperCase() }}
+                </div>
+                <div class="reply-content">
+                  <div class="reply-header">
+                    <span class="reply-author">{{ reply.authorName }}</span>
+                    <span class="reply-date">{{ reply.createdAt | date:'MMM dd, yyyy' }}</span>
+                  </div>
+                  <div class="reply-text">{{ reply.content }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reply Form -->
+            <div class="reply-form" *ngIf="showReplyForm[comment.id]">
+              <div class="reply-avatar">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="reply-input-wrapper">
+                <textarea 
+                  [(ngModel)]="replyContent[comment.id]"
+                  placeholder="Write a reply..."
+                  class="reply-input"
+                  rows="3"></textarea>
+                <div class="reply-actions">
+                  <button 
+                    (click)="addReply(comment.id)" 
+                    class="btn btn-sm btn-primary"
+                    [disabled]="!replyContent[comment.id] || !replyContent[comment.id].trim()">
+                    <i class="fas fa-paper-plane"></i>
+                    Reply
+                  </button>
+                  <button 
+                    (click)="toggleReplyForm(comment.id)" 
+                    class="btn btn-sm btn-outline">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading Comments -->
+        <div class="comments-loading" *ngIf="commentsLoading">
+          <div class="loading-spinner"></div>
+          <p>Loading comments...</p>
+        </div>
+
+        <!-- No Comments -->
+        <div class="no-comments" *ngIf="!commentsLoading && comments.length === 0">
+          <i class="fas fa-comments fa-3x"></i>
+          <h4>Start the Discussion</h4>
+          <p>Be the first to share your thoughts on this article!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="loading">
+  <div class="loading-spinner"></div>
+  <p>Loading article...</p>
+</div>

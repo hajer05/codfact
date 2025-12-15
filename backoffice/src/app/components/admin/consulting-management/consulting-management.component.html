@@ -1,0 +1,182 @@
+<div class="consulting-management">
+  <div class="header">
+    <div>
+      <h1>Gestion des Demandes de Consulting</h1>
+      <p class="subtitle">Gérer et répondre aux demandes de consultation</p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="search-box">
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm"
+        (input)="onSearch()"
+        placeholder="Rechercher par entreprise, contact, email..."
+        class="search-input">
+    </div>
+    
+    <div class="status-filters">
+      <button 
+        *ngFor="let option of statusOptions" 
+        [class]="statusFilter === option.value ? 'filter-btn active' : 'filter-btn'"
+        (click)="statusFilter = option.value; onStatusFilterChange()">
+        {{ option.label }}
+      </button>
+      <button 
+        [class]="statusFilter === 'ALL' ? 'filter-btn active' : 'filter-btn'"
+        (click)="statusFilter = 'ALL'; onStatusFilterChange()">
+        Toutes
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Chargement...</p>
+  </div>
+
+  <!-- Requests Table -->
+  <div class="table-container" *ngIf="!loading">
+    <table class="requests-table">
+      <thead>
+        <tr>
+          <th>Entreprise</th>
+          <th>Contact</th>
+          <th>Email</th>
+          <th>Service</th>
+          <th>Statut</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let request of filteredRequests">
+          <td>
+            <div class="company-cell">
+              <strong>{{ request.companyName }}</strong>
+            </div>
+          </td>
+          <td>{{ request.contactName }}</td>
+          <td>{{ request.email }}</td>
+          <td>{{ request.serviceType }}</td>
+          <td>
+            <span [class]="'status-badge ' + getStatusColor(request.status)">
+              {{ getStatusLabel(request.status) }}
+            </span>
+          </td>
+          <td>{{ formatDate(request.createdAt) }}</td>
+          <td>
+            <button class="btn-view" (click)="openModal(request)">
+              <i class="fas fa-eye"></i>
+              Voir
+            </button>
+          </td>
+        </tr>
+        
+        <tr *ngIf="filteredRequests.length === 0">
+          <td colspan="7" class="no-data">
+            <i class="fas fa-inbox"></i>
+            <p>Aucune demande trouvée</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal for Request Details -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Détails de la Demande</h2>
+        <button class="close-btn" (click)="closeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedRequest">
+        <!-- Request Info -->
+        <div class="section">
+          <h3>Informations de Contact</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Entreprise:</label>
+              <span>{{ selectedRequest.companyName }}</span>
+            </div>
+            <div class="info-item">
+              <label>Contact:</label>
+              <span>{{ selectedRequest.contactName }}</span>
+            </div>
+            <div class="info-item">
+              <label>Email:</label>
+              <span>{{ selectedRequest.email }}</span>
+            </div>
+            <div class="info-item">
+              <label>Téléphone:</label>
+              <span>{{ selectedRequest.phone || 'N/A' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Détails du Projet</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Type de Service:</label>
+              <span>{{ selectedRequest.serviceType }}</span>
+            </div>
+            <div class="info-item full-width">
+              <label>Description:</label>
+              <p class="description">{{ selectedRequest.projectDescription }}</p>
+            </div>
+            <div class="info-item full-width">
+              <label>Besoins:</label>
+              <p class="description">{{ selectedRequest.needs }}</p>
+            </div>
+            <div class="info-item">
+              <label>Budget:</label>
+              <span>{{ selectedRequest.budget || 'N/A' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Délais:</label>
+              <span>{{ selectedRequest.timeline || 'N/A' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Update Form -->
+        <div class="section">
+          <h3>Gérer la Demande</h3>
+          <div class="form-group">
+            <label>Statut *</label>
+            <select [(ngModel)]="updateForm.status" name="status" class="form-control">
+              <option *ngFor="let option of statusOptions" [value]="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Notes Admin</label>
+            <textarea 
+              [(ngModel)]="updateForm.adminNotes" 
+              name="adminNotes"
+              rows="4" 
+              class="form-control"
+              placeholder="Ajouter des notes internes..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeModal()">Annuler</button>
+        <button class="btn-primary" (click)="updateRequest()" [disabled]="!updateForm.status">
+          Enregistrer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+

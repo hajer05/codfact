@@ -1,0 +1,435 @@
+<div class="application-management-container">
+  <!-- Loading Spinner -->
+  <app-loading-spinner *ngIf="loading" [overlay]="true" message="Loading applications..."></app-loading-spinner>
+
+  <div class="header">
+    <h2>Application Management</h2>
+    <div class="subject-info" *ngIf="subjectTitle">
+      <span class="subject-title">{{ subjectTitle }}</span>
+    </div>
+    <button routerLink="/pfe" class="btn btn-outline">
+      <i class="fas fa-arrow-left"></i> Back to PFE Subjects
+    </button>
+  </div>
+
+  <div class="applications-container" *ngIf="!loading">
+    <div class="application-card" *ngFor="let application of applications">
+      <div class="application-header">
+        <div class="student-info">
+          <h3>{{ application.studentName }}</h3>
+          <p>{{ application.studentEmail }}</p>
+        </div>
+        <div class="status-badges">
+          <span class="status-badge" [class.status-accepted]="application.status === 'ACCEPTED'" 
+                [class.status-rejected]="application.status === 'REJECTED'"
+                [class.status-pending]="application.status === 'PENDING'">
+            {{ application.status }}
+          </span>
+          <span class="workflow-badge" *ngIf="application.workflowStep">
+            {{ getWorkflowStepText(application.workflowStep) }}
+          </span>
+          <span class="applied-date">Applied: {{ application.appliedAt | date:'short' }}</span>
+        </div>
+      </div>
+
+      <div class="application-content">
+        <div class="motivation-section">
+          <h4>Motivation</h4>
+          <p class="motivation-text">{{ application.motivation }}</p>
+        </div>
+
+        <!-- CV Section -->
+        <div class="cv-section" *ngIf="application.cvFileName" style="margin-top: 20px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-file-pdf" style="color: #dc2626;"></i>
+            Curriculum Vitae
+          </h4>
+          <div style="display: flex; align-items: center; gap: 12px; background: white; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+            <i class="fas fa-file-pdf" style="font-size: 24px; color: #dc2626;"></i>
+            <span style="flex: 1; font-weight: 500; color: #1f2937;">{{ application.cvOriginalFileName }}</span>
+            <button 
+              (click)="downloadCV(application.id, application.cvOriginalFileName || 'cv.pdf')"
+              class="btn btn-sm btn-primary"
+              style="padding: 6px 16px; font-size: 14px; border-radius: 6px; background: #dc2626; color: white; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+              <i class="fas fa-download"></i> Download CV
+            </button>
+          </div>
+        </div>
+
+        <div class="review-section" *ngIf="application.status !== 'PENDING' && application.reviewComment">
+          <h4>Review</h4>
+          <div class="review-info">
+            <p class="review-comment">{{ application.reviewComment }}</p>
+            <div class="review-meta">
+              <span class="reviewed-by">Reviewed by: {{ application.reviewedByName }}</span>
+              <span class="reviewed-date">{{ application.reviewedAt | date:'short' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Workflow Management Section -->
+        <div class="workflow-section" *ngIf="application.status === 'ACCEPTED' && application.workflowStep" 
+             style="margin-top: 24px; padding: 24px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 12px; border: 2px solid #3b82f6; box-shadow: 0 8px 16px -4px rgba(59, 130, 246, 0.2);">
+          <h4 style="margin: 0 0 24px 0; color: #1f2937; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 2px solid #e5e7eb;">📋 PFE Workflow Progress</h4>
+          
+          <!-- Workflow History - Always Show Completed Steps -->
+          <div class="workflow-history" style="margin-bottom: 24px;">
+            <!-- Application Review History -->
+            <div class="history-step completed" *ngIf="isStepCompleted('APPLICATION_REVIEW', application.workflowStep)" 
+                 style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <i class="fas fa-check-circle" style="color: #22c55e; font-size: 20px;"></i>
+                <h5 style="margin: 0; color: #166534; font-weight: 600;">✅ Application Approved</h5>
+              </div>
+              <div style="padding-left: 32px;">
+                <p style="margin: 0 0 8px 0; color: #166534;"><strong>Comment:</strong> {{ application.reviewComment || 'No comment provided' }}</p>
+                <p style="margin: 0; color: #166534; font-size: 13px;">
+                  <strong>Reviewed by:</strong> {{ application.reviewedByName }} • {{ application.reviewedAt | date:'short' }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Project Review History -->
+            <div class="history-step completed" *ngIf="application.projectReviewedAt" 
+                 style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <i class="fas fa-check-circle" style="color: #22c55e; font-size: 20px;"></i>
+                <h5 style="margin: 0; color: #166534; font-weight: 600;">✅ Project Approved</h5>
+              </div>
+              <div style="padding-left: 32px;">
+                <p style="margin: 0 0 8px 0; color: #166534;"><strong>Comment:</strong> {{ application.projectReviewComment || 'No comment provided' }}</p>
+                <p style="margin: 0; color: #166534; font-size: 13px;">
+                  <strong>Reviewed at:</strong> {{ application.projectReviewedAt | date:'short' }}
+                </p>
+                <!-- Show Project Documents in History -->
+                <div *ngIf="getProjectDocuments(application.id).length > 0" style="margin-top: 12px;">
+                  <p style="margin: 0 0 8px 0; color: #166534; font-weight: 600;">📦 Project Files:</p>
+                  <div *ngFor="let doc of getProjectDocuments(application.id)" style="display: flex; align-items: center; gap: 8px; padding: 8px; background: white; border-radius: 4px; margin-bottom: 4px;">
+                    <i class="fas fa-file-archive" style="color: #3b82f6;"></i>
+                    <span style="flex: 1; font-size: 13px;">{{ doc.originalFileName }}</span>
+                    <button 
+                      (click)="downloadDocument(doc.id, doc.originalFileName)"
+                      class="btn btn-sm"
+                      style="padding: 4px 8px; font-size: 12px; background: #22c55e; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                      <i class="fas fa-download"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Report Review History -->
+            <div class="history-step completed" *ngIf="application.reportReviewedAt" 
+                 style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <i class="fas fa-check-circle" style="color: #22c55e; font-size: 20px;"></i>
+                <h5 style="margin: 0; color: #166534; font-weight: 600;">✅ Report Approved</h5>
+              </div>
+              <div style="padding-left: 32px;">
+                <p style="margin: 0 0 8px 0; color: #166534;"><strong>Comment:</strong> {{ application.reportReviewComment || 'No comment provided' }}</p>
+                <p style="margin: 0; color: #166534; font-size: 13px;">
+                  <strong>Reviewed at:</strong> {{ application.reportReviewedAt | date:'short' }}
+                </p>
+                <!-- Show Report Documents in History -->
+                <div *ngIf="getReportDocuments(application.id).length > 0" style="margin-top: 12px;">
+                  <p style="margin: 0 0 8px 0; color: #166534; font-weight: 600;">📄 Report Files:</p>
+                  <div *ngFor="let doc of getReportDocuments(application.id)" style="display: flex; align-items: center; gap: 8px; padding: 8px; background: white; border-radius: 4px; margin-bottom: 4px;">
+                    <i class="fas fa-file-pdf" style="color: #dc2626;"></i>
+                    <span style="flex: 1; font-size: 13px;">{{ doc.originalFileName }}</span>
+                    <button 
+                      (click)="downloadDocument(doc.id, doc.originalFileName)"
+                      class="btn btn-sm"
+                      style="padding: 4px 8px; font-size: 12px; background: #22c55e; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                      <i class="fas fa-download"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Jury Scheduled History -->
+            <div class="history-step completed" *ngIf="application.juryDate" 
+                 style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <i class="fas fa-check-circle" style="color: #22c55e; font-size: 20px;"></i>
+                <h5 style="margin: 0; color: #166534; font-weight: 600;">✅ Jury Scheduled</h5>
+              </div>
+              <div style="padding-left: 32px;">
+                <p style="margin: 0 0 4px 0; color: #166534;"><strong>Date:</strong> {{ application.juryDate | date:'full' }}</p>
+                <p style="margin: 0; color: #166534;"><strong>Location:</strong> {{ application.juryLocation }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Current Action Required Section -->
+          <div *ngIf="application.workflowStep !== 'COMPLETED'" style="margin-top: 24px; padding: 16px; background: #fef3c7; border: 2px solid #fbbf24; border-radius: 8px; margin-bottom: 20px;">
+            <h5 style="margin: 0 0 8px 0; color: #92400e; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-exclamation-triangle"></i>
+              Current Action Required
+            </h5>
+            <p style="margin: 0; color: #92400e;">{{ getWorkflowStepText(application.workflowStep) }}</p>
+          </div>
+          
+          <!-- Project Review -->
+          <div class="workflow-step" *ngIf="application.workflowStep === 'PROJECT_REVIEW'" 
+               style="background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; border: 2px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: all 0.3s ease; position: relative; overflow: hidden;">
+            <div class="step-header" style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px; font-weight: 700; font-size: 18px; color: #1f2937;">
+              <i class="fas fa-code" style="font-size: 24px; color: #3b82f6; background: rgba(59, 130, 246, 0.1); padding: 8px; border-radius: 8px;"></i>
+              <span>Project Review Required</span>
+            </div>
+            <p style="margin: 0 0 20px 0; color: #4b5563; line-height: 1.6; font-size: 15px;">Student has uploaded their project. Review and approve/reject.</p>
+            
+            <!-- Show CV -->
+            <div class="review-materials" *ngIf="application.cvFileName" style="margin-bottom: 20px; padding: 16px; background: white; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <h5 style="margin: 0 0 12px 0; color: #1f2937; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-file-pdf" style="color: #dc2626;"></i>
+                Student CV
+              </h5>
+              <div style="display: flex; align-items: center; gap: 12px; padding: 10px; background: #f8fafc; border-radius: 6px;">
+                <span style="flex: 1; font-weight: 500; color: #1f2937;">{{ application.cvOriginalFileName }}</span>
+                <button 
+                  (click)="downloadCV(application.id, application.cvOriginalFileName || 'cv.pdf')"
+                  class="btn btn-sm btn-outline"
+                  style="padding: 6px 12px; font-size: 13px;">
+                  <i class="fas fa-download"></i> Download
+                </button>
+              </div>
+            </div>
+
+            <!-- Show Project Documents -->
+            <div class="review-materials" *ngIf="getProjectDocuments(application.id).length > 0" style="margin-bottom: 20px; padding: 16px; background: white; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <h5 style="margin: 0 0 12px 0; color: #1f2937; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-file-archive" style="color: #3b82f6;"></i>
+                Submitted Project Files
+              </h5>
+              <div *ngFor="let doc of getProjectDocuments(application.id)" style="display: flex; align-items: center; gap: 12px; padding: 10px; background: #f8fafc; border-radius: 6px; margin-bottom: 8px;">
+                <i class="fas fa-file-archive" style="font-size: 20px; color: #3b82f6;"></i>
+                <div style="flex: 1;">
+                  <div style="font-weight: 500; color: #1f2937;">{{ doc.originalFileName }}</div>
+                  <div style="font-size: 12px; color: #64748b;">{{ formatFileSize(doc.fileSize) }} • {{ doc.uploadedAt | date:'short' }}</div>
+                </div>
+                <button 
+                  (click)="downloadDocument(doc.id, doc.originalFileName)"
+                  class="btn btn-sm btn-outline"
+                  style="padding: 6px 12px; font-size: 13px;">
+                  <i class="fas fa-download"></i> Download
+                </button>
+              </div>
+            </div>
+            
+            <div class="workflow-actions" *ngIf="reviewingWorkflowId !== application.id" style="margin-bottom: 20px;">
+              <button (click)="startWorkflowReview(application.id, 'project')" class="btn btn-primary" 
+                      style="padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; border: none; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
+                <i class="fas fa-eye" style="font-size: 14px;"></i> Review Project
+              </button>
+            </div>
+
+            <div class="workflow-form" *ngIf="reviewingWorkflowId === application.id && reviewType === 'project'">
+              <div class="form-group">
+                <label>Project Review Comment</label>
+                <textarea [(ngModel)]="workflowComment" class="form-control" rows="3" 
+                         placeholder="Add your project review comments..."></textarea>
+              </div>
+              <div class="form-actions">
+                <button (click)="submitWorkflowReview(application.id, 'project', true)" class="btn btn-success">
+                  <i class="fas fa-check"></i> Approve Project
+                </button>
+                <button (click)="submitWorkflowReview(application.id, 'project', false)" class="btn btn-danger">
+                  <i class="fas fa-times"></i> Reject Project
+                </button>
+                <button (click)="cancelWorkflowReview()" class="btn btn-outline">Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Report Review -->
+          <div class="workflow-step" *ngIf="application.workflowStep === 'REPORT_REVIEW'">
+            <div class="step-header">
+              <i class="fas fa-file-alt"></i>
+              <span>Report Review Required</span>
+            </div>
+            <p>Student has uploaded their final report. Review and approve/reject.</p>
+            
+            <!-- Show CV -->
+            <div class="review-materials" *ngIf="application.cvFileName" style="margin-bottom: 20px; padding: 16px; background: white; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <h5 style="margin: 0 0 12px 0; color: #1f2937; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-file-pdf" style="color: #dc2626;"></i>
+                Student CV
+              </h5>
+              <div style="display: flex; align-items: center; gap: 12px; padding: 10px; background: #f8fafc; border-radius: 6px;">
+                <span style="flex: 1; font-weight: 500; color: #1f2937;">{{ application.cvOriginalFileName }}</span>
+                <button 
+                  (click)="downloadCV(application.id, application.cvOriginalFileName || 'cv.pdf')"
+                  class="btn btn-sm btn-outline"
+                  style="padding: 6px 12px; font-size: 13px;">
+                  <i class="fas fa-download"></i> Download
+                </button>
+              </div>
+            </div>
+
+            <!-- Show Report Documents -->
+            <div class="review-materials" *ngIf="getReportDocuments(application.id).length > 0" style="margin-bottom: 20px; padding: 16px; background: white; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <h5 style="margin: 0 0 12px 0; color: #1f2937; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-file-pdf" style="color: #3b82f6;"></i>
+                Submitted Report Files
+              </h5>
+              <div *ngFor="let doc of getReportDocuments(application.id)" style="display: flex; align-items: center; gap: 12px; padding: 10px; background: #f8fafc; border-radius: 6px; margin-bottom: 8px;">
+                <i class="fas fa-file-pdf" style="font-size: 20px; color: #3b82f6;"></i>
+                <div style="flex: 1;">
+                  <div style="font-weight: 500; color: #1f2937;">{{ doc.originalFileName }}</div>
+                  <div style="font-size: 12px; color: #64748b;">{{ formatFileSize(doc.fileSize) }} • {{ doc.uploadedAt | date:'short' }}</div>
+                </div>
+                <button 
+                  (click)="downloadDocument(doc.id, doc.originalFileName)"
+                  class="btn btn-sm btn-outline"
+                  style="padding: 6px 12px; font-size: 13px;">
+                  <i class="fas fa-download"></i> Download
+                </button>
+              </div>
+            </div>
+            
+            <div class="workflow-actions" *ngIf="reviewingWorkflowId !== application.id">
+              <button (click)="startWorkflowReview(application.id, 'report')" class="btn btn-primary">
+                <i class="fas fa-eye"></i> Review Report
+              </button>
+            </div>
+
+            <div class="workflow-form" *ngIf="reviewingWorkflowId === application.id && reviewType === 'report'">
+              <div class="form-group">
+                <label>Report Review Comment</label>
+                <textarea [(ngModel)]="workflowComment" class="form-control" rows="3" 
+                         placeholder="Add your report review comments..."></textarea>
+              </div>
+              <div class="form-actions">
+                <button (click)="submitWorkflowReview(application.id, 'report', true)" class="btn btn-success">
+                  <i class="fas fa-check"></i> Approve Report
+                </button>
+                <button (click)="submitWorkflowReview(application.id, 'report', false)" class="btn btn-danger">
+                  <i class="fas fa-times"></i> Reject Report
+                </button>
+                <button (click)="cancelWorkflowReview()" class="btn btn-outline">Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Jury Scheduling -->
+          <div class="workflow-step" *ngIf="application.workflowStep === 'JURY_SCHEDULING'">
+            <div class="step-header">
+              <i class="fas fa-calendar"></i>
+              <span>Schedule Jury Presentation</span>
+            </div>
+            <p>Both project and report have been approved. Schedule the jury presentation.</p>
+            
+            <div class="workflow-actions" *ngIf="reviewingWorkflowId !== application.id">
+              <button (click)="startWorkflowReview(application.id, 'jury')" class="btn btn-primary">
+                <i class="fas fa-calendar-plus"></i> Schedule Jury
+              </button>
+            </div>
+
+            <div class="workflow-form" *ngIf="reviewingWorkflowId === application.id && reviewType === 'jury'">
+              <div class="form-group">
+                <label>Jury Date & Time</label>
+                <input type="datetime-local" [(ngModel)]="juryDate" class="form-control">
+              </div>
+              <div class="form-group">
+                <label>Jury Location</label>
+                <input type="text" [(ngModel)]="juryLocation" class="form-control" 
+                       placeholder="e.g., Room A101, Building B">
+              </div>
+              <div class="form-group">
+                <label>Additional Comments (Optional)</label>
+                <textarea [(ngModel)]="workflowComment" class="form-control" rows="2" 
+                         placeholder="Any additional instructions for the student..."></textarea>
+              </div>
+              <div class="form-actions">
+                <button (click)="submitJuryScheduling(application.id)" class="btn btn-success">
+                  <i class="fas fa-check"></i> Schedule Jury
+                </button>
+                <button (click)="cancelWorkflowReview()" class="btn btn-outline">Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Completed Status -->
+          <div class="workflow-step completed" *ngIf="application.workflowStep === 'COMPLETED'">
+            <div class="step-header">
+              <i class="fas fa-trophy"></i>
+              <span>PFE Completed! 🎉</span>
+            </div>
+            <div class="completion-info" *ngIf="application.juryDate">
+              <p><strong>Jury Date:</strong> {{ application.juryDate | date:'full' }}</p>
+              <p *ngIf="application.juryLocation"><strong>Location:</strong> {{ application.juryLocation }}</p>
+            </div>
+          </div>
+
+          <!-- Progress Indicator -->
+          <div class="progress-indicator">
+            <div class="progress-steps">
+              <div class="progress-step" [class.completed]="isStepCompleted('APPLICATION_REVIEW', application.workflowStep)">
+                <span>1</span> Application
+              </div>
+              <div class="progress-step" [class.completed]="isStepCompleted('PROJECT_UPLOAD', application.workflowStep)">
+                <span>2</span> Project
+              </div>
+              <div class="progress-step" [class.completed]="isStepCompleted('REPORT_UPLOAD', application.workflowStep)">
+                <span>3</span> Report
+              </div>
+              <div class="progress-step" [class.completed]="isStepCompleted('JURY_SCHEDULING', application.workflowStep)">
+                <span>4</span> Jury
+              </div>
+              <div class="progress-step" [class.completed]="application.workflowStep === 'COMPLETED'">
+                <span>5</span> Complete
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="application-actions" *ngIf="application.status === 'PENDING'">
+        <div class="review-form" *ngIf="reviewingApplicationId === application.id; else reviewButtons">
+          <div class="form-group">
+            <label for="reviewComment">Review Comment</label>
+            <textarea 
+              id="reviewComment"
+              [(ngModel)]="reviewComment"
+              class="form-control"
+              placeholder="Add your review comment..."
+              rows="3"></textarea>
+          </div>
+          <div class="form-actions">
+            <button 
+              (click)="reviewApplication(application.id, 'ACCEPTED')" 
+              class="btn btn-success">
+              <i class="fas fa-check"></i> Accept
+            </button>
+            <button 
+              (click)="reviewApplication(application.id, 'REJECTED')" 
+              class="btn btn-danger">
+              <i class="fas fa-times"></i> Reject
+            </button>
+            <button (click)="cancelReview()" class="btn btn-outline">Cancel</button>
+          </div>
+        </div>
+
+        <ng-template #reviewButtons>
+          <button 
+            (click)="startReview(application.id)" 
+            class="btn btn-primary">
+            <i class="fas fa-gavel"></i> Review Application
+          </button>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading applications...</p>
+  </div>
+
+  <div class="no-applications" *ngIf="!loading && applications.length === 0">
+    <i class="fas fa-inbox fa-3x"></i>
+    <h3>No applications yet</h3>
+    <p>Students haven't applied to this PFE subject yet.</p>
+  </div>
+</div>

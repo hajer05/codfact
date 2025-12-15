@@ -1,0 +1,241 @@
+<div class="modern-page-background">
+<!-- Hero Section -->
+<section class="bg-gradient-to-br from-primary-50/80 to-white/80 backdrop-blur-sm py-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center">
+      <h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+        Welcome to <span class="text-primary-600">Coding Factory</span>
+      </h1>
+      <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+        Plateforme e-learning intelligente pour maîtriser la programmation et développer vos compétences techniques. 
+        Rejoignez notre communauté et démarrez votre parcours vers l'excellence en développement logiciel.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a *ngIf="!isAuthenticated" routerLink="/register" 
+           class="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
+          Commencer gratuitement
+        </a>
+        <a routerLink="/courses" 
+           class="border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
+          Parcourir les cours
+        </a>
+        <a routerLink="/consulting" 
+           class="border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
+          Services de Consulting
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About Coding Factory Section -->
+<section class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        Qui sommes-nous ?
+      </h2>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
+        <strong>Coding Factory</strong> est une startup innovante spécialisée dans le développement d'applications Web, 
+        l'Intelligence Artificielle et l'automatisation. Nous transformons des idées en produits concrets grâce à 
+        notre expertise technologique et une méthodologie collaborative.
+      </p>
+    </div>
+    
+    <div class="grid md:grid-cols-3 gap-8 mb-12">
+      <div class="text-center p-6 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 hover:shadow-lg transition-shadow">
+        <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-3">IA pour Tous</h3>
+        <p class="text-gray-600">Solutions d'intelligence artificielle accessibles et innovantes pour tous les secteurs.</p>
+      </div>
+      
+      <div class="text-center p-6 rounded-xl bg-gradient-to-br from-green-50 to-green-100 hover:shadow-lg transition-shadow">
+        <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-3">IA pour la Santé</h3>
+        <p class="text-gray-600">Applications intelligentes dédiées au secteur de la santé et du bien-être.</p>
+      </div>
+      
+      <div class="text-center p-6 rounded-xl bg-gradient-to-br from-red-50 to-red-100 hover:shadow-lg transition-shadow">
+        <div class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-3">Cybersécurité</h3>
+        <p class="text-gray-600">Solutions robustes pour protéger vos données et systèmes contre les menaces.</p>
+      </div>
+    </div>
+
+    <div class="bg-gray-50 rounded-2xl p-8">
+      <h3 class="text-2xl font-bold text-gray-900 mb-4 text-center">Nos Services</h3>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="text-center">
+          <h4 class="font-semibold text-gray-900 mb-2">Développement Logiciel</h4>
+          <p class="text-gray-600 text-sm">Applications web sur mesure adaptées à vos besoins</p>
+        </div>
+        <div class="text-center">
+          <h4 class="font-semibold text-gray-900 mb-2">Formations Pratiques</h4>
+          <p class="text-gray-600 text-sm">Formations destinées aux développeurs débutants et confirmés</p>
+        </div>
+        <div class="text-center">
+          <h4 class="font-semibold text-gray-900 mb-2">Solutions Innovantes</h4>
+          <p class="text-gray-600 text-sm">Adaptées aux PME et grandes entreprises</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About the Application Section -->
+<section class="py-20 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        Notre Plateforme E-Learning
+      </h2>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+        Une plateforme e-learning intelligente permettant une gestion évolutive et un apprentissage personnalisé 
+        pour les étudiants en informatique.
+      </p>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-8">
+      <div class="bg-white rounded-xl p-8 shadow-lg">
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">Fonctionnalités Principales</h3>
+        <ul class="space-y-3 text-gray-600">
+          <li class="flex items-start">
+            <svg class="w-6 h-6 text-primary-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span><strong>Gestion de Formations :</strong> Créez, gérez et suivez vos cours en ligne</span>
+          </li>
+          <li class="flex items-start">
+            <svg class="w-6 h-6 text-primary-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span><strong>Espace PFE :</strong> Gérez vos projets de fin d'études avec un workflow complet</span>
+          </li>
+          <li class="flex items-start">
+            <svg class="w-6 h-6 text-primary-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span><strong>Paiement en Ligne :</strong> Intégration sécurisée avec Stripe pour les transactions</span>
+          </li>
+          <li class="flex items-start">
+            <svg class="w-6 h-6 text-primary-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span><strong>Consulting :</strong> Services de conseil et d'accompagnement personnalisés</span>
+          </li>
+          <li class="flex items-start">
+            <svg class="w-6 h-6 text-primary-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span><strong>Chatbots IA :</strong> Assistants intelligents pour le support et la formation</span>
+          </li>
+          <li class="flex items-start">
+            <svg class="w-6 h-6 text-primary-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span><strong>Blog Éducatif :</strong> Partagez vos connaissances et découvrez des articles enrichissants</span>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="bg-white rounded-xl p-8 shadow-lg">
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">Expérience Utilisateur</h3>
+        <ul class="space-y-3 text-gray-600">
+          <li class="flex items-start">
+            <svg class="w-6 h-6 text-primary-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span><strong>Apprentissage Personnalisé :</strong> Suivez votre progression et adaptez votre parcours</span>
+          </li>
+          <li class="flex items-start">
+            <svg class="w-6 h-6 text-primary-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            <span><strong>Communauté Active :</strong> Interagissez avec des étudiants et des experts</span>
+          </li>
+          <li class="flex items-start">
+            <svg class="w-6 h-6 text-primary-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+            <span><strong>Sécurité Renforcée :</strong> Vos données sont protégées avec les meilleures pratiques</span>
+          </li>
+          <li class="flex items-start">
+            <svg class="w-6 h-6 text-primary-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            <span><strong>Accès Rapide :</strong> Interface intuitive et performances optimisées</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Features Section -->
+<section class="py-20 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        Pourquoi Choisir Coding Factory ?
+      </h2>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        Nous offrons la meilleure expérience d'apprentissage avec un curriculum à la pointe de la technologie 
+        et un support personnalisé pour chaque étudiant.
+      </p>
+    </div>
+    
+    <div class="grid md:grid-cols-3 gap-8">
+      <div *ngFor="let feature of features" class="text-center p-6 rounded-xl bg-white hover:shadow-lg transition-shadow">
+        <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="feature.icon"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-3">{{ feature.title }}</h3>
+        <p class="text-gray-600">{{ feature.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-20 bg-primary-600">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      <div *ngFor="let stat of stats" class="text-white">
+        <div class="text-4xl md:text-5xl font-bold mb-2">{{ stat.number }}</div>
+        <div class="text-primary-100 text-lg">{{ stat.label }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 bg-primary-600">
+  <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+    <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
+      Prêt à Démarrer Votre Parcours ?
+    </h2>
+    <p class="text-xl text-primary-100 mb-8">
+      Rejoignez des milliers d'étudiants qui ont transformé leur carrière grâce à nos cours et notre plateforme innovante.
+    </p>
+    <a [routerLink]="isAuthenticated ? '/courses' : '/register'" 
+       class="bg-white hover:bg-gray-100 text-primary-600 px-8 py-4 rounded-lg text-lg font-semibold transition-colors inline-block">
+      Commencer Aujourd'hui
+    </a>
+  </div>
+</section>
+</div>

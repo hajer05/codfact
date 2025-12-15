@@ -1,0 +1,123 @@
+<div class="pfe-apply-container">
+  <!-- Header -->
+  <div class="header-section">
+    <div class="container">
+      <div class="breadcrumb">
+        <a [routerLink]="['/pfe', subjectId]" class="breadcrumb-link">
+          <i class="fas fa-arrow-left"></i> Back to Project Details
+        </a>
+      </div>
+      
+      <div class="apply-header">
+        <h1>Apply for PFE Project</h1>
+        <p *ngIf="subject">Submit your application for "{{ subject.title }}"</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Form -->
+  <div class="form-section" *ngIf="!loading && subject">
+    <div class="container">
+      <div class="form-wrapper">
+        <!-- Project Summary -->
+        <div class="project-summary">
+          <h2>{{ subject.title }}</h2>
+          <div class="supervisor-info">
+            <span class="supervisor">Supervised by {{ subject.createdByName }}</span>
+            <span class="role-badge">{{ subject.createdByRole }}</span>
+          </div>
+          <p class="description">{{ subject.description | slice:0:200 }}...</p>
+        </div>
+
+        <!-- Application Form -->
+        <div class="application-form">
+          <h3>Your Application</h3>
+          <form [formGroup]="applicationForm" (ngSubmit)="onSubmit()">
+            <div class="form-group">
+              <label for="motivation">
+                Motivation Letter *
+                <span class="char-count">{{ motivation?.value?.length || 0 }} characters (minimum 50)</span>
+              </label>
+              <textarea 
+                id="motivation"
+                formControlName="motivation"
+                class="form-control motivation-textarea"
+                [class.error]="motivation?.invalid && motivation?.touched"
+                placeholder="Explain why you're interested in this PFE project. Include your relevant skills, experience, and what you hope to achieve..."
+                rows="12"></textarea>
+              <div class="error-message" *ngIf="motivation?.invalid && motivation?.touched">
+                <span *ngIf="motivation?.errors?.['required']">Motivation letter is required</span>
+                <span *ngIf="motivation?.errors?.['minlength']">Motivation letter must be at least 50 characters</span>
+              </div>
+              <div class="form-help">
+                <p><strong>Tips for a great motivation letter:</strong></p>
+                <ul>
+                  <li>Explain your genuine interest in the project</li>
+                  <li>Highlight relevant skills and experience</li>
+                  <li>Mention specific aspects of the project that excite you</li>
+                  <li>Describe what you hope to learn and contribute</li>
+                  <li>Keep it professional but personal</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- CV Upload -->
+            <div class="form-group">
+              <label for="cvFile">
+                CV (Optional)
+                <span class="file-info">PDF format only, max 5MB</span>
+              </label>
+              <div class="file-upload-wrapper">
+                <input 
+                  type="file" 
+                  id="cvFile" 
+                  accept=".pdf"
+                  (change)="onFileSelected($event)"
+                  class="file-input"
+                  #fileInput>
+                <div class="file-upload-area" *ngIf="!cvFileName" (click)="fileInput.click()">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  <p>Click to upload your CV (PDF)</p>
+                  <span class="file-hint">or drag and drop</span>
+                </div>
+                <div class="file-selected" *ngIf="cvFileName">
+                  <div class="file-info-display">
+                    <i class="fas fa-file-pdf"></i>
+                    <span class="file-name">{{ cvFileName }}</span>
+                  </div>
+                  <button type="button" class="btn-remove" (click)="removeCVFile()">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="form-help">
+                <p><i class="fas fa-info-circle"></i> Uploading your CV is optional but recommended. It helps the supervisor better evaluate your application.</p>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+              <button type="button" (click)="cancel()" class="btn btn-outline">
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                class="btn btn-primary"
+                [disabled]="submitting || applicationForm.invalid">
+                <i class="fas fa-spinner fa-spin" *ngIf="submitting"></i>
+                <i class="fas fa-paper-plane" *ngIf="!submitting"></i>
+                {{ submitting ? 'Submitting...' : 'Submit Application' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="loading-spinner"></div>
+    <p>Loading project details...</p>
+  </div>
+</div>

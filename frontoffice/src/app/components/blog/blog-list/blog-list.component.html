@@ -1,0 +1,125 @@
+<div class="blog-list-container">
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <div class="hero-content">
+      <h1>Learning Blog</h1>
+      <p>Discover insights, tutorials, and knowledge shared by our community</p>
+      <div class="hero-actions">
+        <div class="search-box">
+          <input 
+            type="text" 
+            [(ngModel)]="searchTerm" 
+            placeholder="Search blogs, topics, authors..." 
+            class="search-input">
+          <i class="fas fa-search search-icon"></i>
+        </div>
+        <button routerLink="/blogs/create" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Share Your Knowledge
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Blog Grid -->
+  <div class="blogs-section">
+    <div class="container">
+      <div class="section-header" *ngIf="!searchTerm">
+        <h2>Latest Posts</h2>
+        <p>Explore the latest articles and tutorials from our community</p>
+      </div>
+      
+      <div class="section-header" *ngIf="searchTerm">
+        <h2>Search Results</h2>
+        <p>{{ filteredBlogs.length }} blog(s) found for "{{ searchTerm }}"</p>
+      </div>
+
+      <div class="blog-grid" *ngIf="!loading">
+        <article class="blog-card" *ngFor="let blog of filteredBlogs">
+          <!-- Featured Image -->
+          <div class="blog-image" *ngIf="blog.photo">
+            <img [src]="blog.photo" [alt]="blog.title">
+            <div class="image-overlay">
+              <button 
+                routerLink="/blogs/{{ blog.id }}" 
+                class="read-more-btn">
+                Read Article
+              </button>
+            </div>
+          </div>
+          
+          <!-- Blog Content -->
+          <div class="blog-content">
+            <!-- Tags -->
+            <div class="blog-tags" *ngIf="blog.tags.length > 0">
+              <span class="tag" *ngFor="let tag of blog.tags | slice:0:3">{{ tag }}</span>
+            </div>
+            
+            <!-- Title & Meta -->
+            <div class="blog-header">
+              <h3 class="blog-title">
+                <a routerLink="/blogs/{{ blog.id }}">{{ blog.title }}</a>
+              </h3>
+              <div class="blog-meta">
+                <div class="author-info">
+                  <span class="author-name">{{ blog.authorName }}</span>
+                  <span class="author-role">{{ blog.authorRole }}</span>
+                </div>
+                <span class="date">{{ blog.createdAt | date:'MMM dd, yyyy' }}</span>
+              </div>
+            </div>
+            
+            <!-- Excerpt -->
+            <p class="blog-excerpt">{{ blog.content | slice:0:150 }}...</p>
+            
+            <!-- Stats & Actions -->
+            <div class="blog-footer">
+              <div class="blog-stats">
+                <button 
+                  (click)="likeBlog(blog.id!)" 
+                  class="stat-btn like-btn"
+                  [class.liked]="false">
+                  <i class="fas fa-heart"></i>
+                  <span>{{ blog.likes }}</span>
+                </button>
+                <div class="stat">
+                  <i class="fas fa-comment"></i>
+                  <span>{{ blog.commentCount }}</span>
+                </div>
+                <div class="stat">
+                  <i class="fas fa-clock"></i>
+                  <span>5 min read</span>
+                </div>
+              </div>
+              
+              <button 
+                routerLink="/blogs/{{ blog.id }}" 
+                class="read-more">
+                Read More <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-section" *ngIf="loading">
+        <div class="loading-spinner"></div>
+        <p>Loading amazing content...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!loading && filteredBlogs.length === 0">
+        <div class="empty-icon">
+          <i class="fas fa-search" *ngIf="searchTerm"></i>
+          <i class="fas fa-blog" *ngIf="!searchTerm"></i>
+        </div>
+        <h3>{{ searchTerm ? 'No blogs found' : 'No blogs yet' }}</h3>
+        <p *ngIf="searchTerm">Try adjusting your search terms or explore different topics.</p>
+        <p *ngIf="!searchTerm">Be the first to share your knowledge with the community!</p>
+        <button routerLink="/blogs/create" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Create First Blog
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
